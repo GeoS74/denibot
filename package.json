@@ -1,0 +1,22 @@
+{
+    "name": "denibot",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "lint": "eslint .",
+        "test": "mocha --no-warnings --ignore=node_modules/** **/*.test.js"
+    },
+    "author": "GeoS",
+    "license": "ISC",
+    "devDependencies": {
+        "eslint": "^8.2.0",
+        "eslint-config-airbnb-base": "^15.0.0",
+        "eslint-plugin-import": "^2.25.2"
+    },
+    "dependencies": {
+        "dotenv": "^16.0.1",
+        "koa": "^2.13.4",
+        "koa-router": "^11.0.1"
+    }
+}
