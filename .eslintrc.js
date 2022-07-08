@@ -10,6 +10,12 @@ module.exports = {
   },
   rules: {
     'no-console': 'off',
+    'linebreak-style': 1,
+    'no-template-curly-in-string': 'off',
+    'no-underscore-dangle': 'off',
+    'no-use-before-define': 'off',
+    'consistent-return': 'off',
+    'no-return-assign': 'off',
   },
   ignorePatterns: ['*.test.js'],
 };
