@@ -1,31 +1,18 @@
 const Koa = require('koa');
 const Router = require('koa-router');
-const koaBody = require('koa-body');
 
+const ownerRoutes = require('./routes/owner.routes');
+const apiRoutes = require('./routes/api.routes');
 const fileController = require('./controllers/files.controller');
-const ownerController = require('./controllers/owner.controller');
 
 const app = new Koa();
+app.use(ownerRoutes);
+app.use(apiRoutes);
 
-// system router
 const router = new Router();
 
 router.get('/upload', fileController.upload);
 
-router.get('/owner', ownerController.getAll);
-router.get('/owner/:id', ownerController.get);
-router.post('/owner', koaBody(), ownerController.add);
-router.delete('/owner/:id', ownerController.delete);
-
 app.use(router.routes());
-
-// API router
-const routerAPI = new Router({ prefix: '/api' });
-
-routerAPI.get('/', (ctx) => {
-  ctx.body = 'routerAPI listen';
-});
-
-app.use(routerAPI.routes());
 
 module.exports = app;

@@ -9,7 +9,24 @@ module.exports.add = async (ctx) => {
       name: owner.name,
     };
   } catch (error) {
-    ctx.status = 500;
+    ctx.status = error?.errors ? 400 : 500;
+    ctx.body = {
+      error: error.message,
+    };
+  }
+};
+
+module.exports.update = async (ctx) => {
+  try {
+    const owner = await _updateOwner(ctx.params.id, ctx.request.body);
+
+    ctx.status = 200;
+    ctx.body = {
+      id: owner.id,
+      name: owner.name,
+    };
+  } catch (error) {
+    ctx.status = error?.errors ? 400 : 500;
     ctx.body = {
       error: error.message,
     };
@@ -32,7 +49,7 @@ module.exports.delete = async (ctx) => {
       name: owner.name,
     };
   } catch (error) {
-    ctx.status = 500;
+    ctx.status = error?.errors ? 400 : 500;
     ctx.body = {
       error: error.message,
     };
@@ -55,7 +72,7 @@ module.exports.get = async (ctx) => {
       name: owner.name,
     };
   } catch (error) {
-    ctx.status = 500;
+    ctx.status = error?.errors ? 400 : 500;
     ctx.body = {
       error: error.message,
     };
@@ -71,7 +88,7 @@ module.exports.getAll = async (ctx) => {
       name: owner.name,
     }));
   } catch (error) {
-    ctx.status = 500;
+    ctx.status = error?.errors ? 400 : 500;
     ctx.body = {
       error: error.message,
     };
@@ -79,9 +96,11 @@ module.exports.getAll = async (ctx) => {
 };
 
 async function _addOwner(owner) {
-  return Owner.create({
-    name: owner.name,
-  });
+  return Owner.create(owner);
+}
+
+async function _updateOwner(id, owner) {
+  return Owner.findByIdAndUpdate(id, owner, { new: true });
 }
 
 async function _delOwner(id) {

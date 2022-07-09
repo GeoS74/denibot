@@ -10,9 +10,11 @@
     "author": "GeoS",
     "license": "ISC",
     "devDependencies": {
+        "chai": "^4.3.6",
         "eslint": "^8.2.0",
         "eslint-config-airbnb-base": "^15.0.0",
-        "eslint-plugin-import": "^2.25.2"
+        "eslint-plugin-import": "^2.25.2",
+        "mocha": "^10.0.0"
     },
     "dependencies": {
         "dotenv": "^16.0.1",
@@ -21,6 +23,7 @@
         "koa-router": "^11.0.1",
         "mongoose": "^6.4.3",
         "mongoose-beautiful-unique-validation": "^7.1.1",
+        "node-fetch": "^2.6.7",
         "xlsx": "^0.18.5"
     }
 }
