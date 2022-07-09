@@ -50,14 +50,9 @@ describe('/test/Owner.test.js', () => {
         }));
 
       expect(response.status, 'сервер возвращает статус 201').to.be.equal(201);
-      expect(response.data, 'сервер возвращает объект')
-        .that.is.an('object');
-      expect(response.data, 'сервер возвращает id созданного объекта')
+      expect(response.data, 'сервер возвращает объект с полями id, name')
         .that.is.an('object')
-        .to.have.property('id');
-      expect(response.data, 'сервер возвращает name созданного объекта')
-        .that.is.an('object')
-        .that.to.have.property('name');
+        .to.have.keys(['id', 'name']);
     });
 
     it('read owner', async () => {
@@ -75,10 +70,8 @@ describe('/test/Owner.test.js', () => {
       expect(response.status, 'сервер возвращает статус 200').equal(200);
       expect(response.data, 'сервер возвращает массив')
         .that.is.an('array');
-      expect(response.data[0], 'сервер возвращает id объекта')
-        .to.have.property('id');
-      expect(response.data[0], 'сервер возвращает name объекта')
-        .to.have.property('name');
+      expect(response.data[0], 'сервер возвращает id, name объекта')
+        .to.have.keys(['id', 'name']);
 
       const ownerId = await Owner.findOne().then((res) => res.id);
       response = await fetch(`http://localhost:${config.server.port}/owner/${ownerId}`, optional)
@@ -88,13 +81,9 @@ describe('/test/Owner.test.js', () => {
         }));
 
       expect(response.status, 'сервер возвращает статус 200').equal(200);
-      expect(response.data, 'сервер возвращает массив')
-        .that.is.an('object');
-
-      expect(response.data, 'сервер возвращает id объекта')
-        .to.have.property('id');
-      expect(response.data, 'сервер возвращает name объекта')
-        .to.have.property('name');
+      expect(response.data, 'сервер возвращает объект с полями id, name')
+        .that.is.an('object')
+        .to.have.keys(['id', 'name']);
     });
 
     it('update owner', async () => {
@@ -117,13 +106,9 @@ describe('/test/Owner.test.js', () => {
         }));
 
       expect(response.status, 'сервер возвращает статус 200').to.be.equal(200);
-      expect(response.data, 'сервер возвращает объект')
-        .that.is.an('object');
-
-      expect(response.data, 'сервер возвращает id измененного объекта')
-        .to.have.property('id');
-      expect(response.data, 'сервер возвращает name измененного объекта')
-        .to.have.property('name');
+      expect(response.data, 'сервер возвращает объект с полями id, name')
+        .that.is.an('object')
+        .to.have.keys(['id', 'name']);
 
       optional.body = JSON.stringify({ name: 'Sam' });
       response = await fetch(`http://localhost:${config.server.port}/owner/${ownerId}`, optional)
@@ -160,13 +145,9 @@ describe('/test/Owner.test.js', () => {
         }));
 
       expect(response.status, 'сервер возвращает статус 200').to.be.equal(200);
-      expect(response.data, 'сервер возвращает объект')
-        .that.is.an('object');
-
-      expect(response.data, 'сервер возвращает id удаленного объекта')
-        .to.have.property('id');
-      expect(response.data, 'сервер возвращает name удаленного объекта')
-        .to.have.property('name');
+      expect(response.data, 'сервер возвращает объект с полями id, name')
+        .that.is.an('object')
+        .to.have.keys(['id', 'name']);
     });
   });
 });
