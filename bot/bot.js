@@ -1,44 +1,30 @@
 class Bot {
-  constructor(data){
-    process.on('message', message => this.action(message))
-    this.name = data.name
-    this.uri = data.uri
-  }
-
-  status = 'created';
+  state;
   name;
   uri;
+  pid;
 
-  action(message) {
-    switch(message){
-      case 'status':
-        // console.log(`${this.name} status: ${this.status}`)
-      this.getStatus()
+  constructor(data, pid) {
+    process.on('message', message => this.parentSend(message))
+    this.state = 'created'
+    this.name = data.name
+    this.uri = data.uri
+    this.pid = pid
+  }
+
+  parentSend(message) {
+    switch (message) {
+      case 'state':
+        this.getState()
+        break
     }
   }
 
-  getStatus(){
-    process.send(`${this.name} status: ${this.status}`)
+  getState() {
+    const state = `pid: ${this.pid} name: ${this.name} state: ${this.state}`
+    process.send(state)
+    console.log(state)
   }
 }
 
-const bot = new Bot(process.env)
-
-
-
-
-// console.log(`child process ${process.argv[2]} running`);
-
-// process.on('message', (message) => {
-//   switch (message) {
-//     case 'status':
-//       console.log(`bot ${message} is running`);
-//       break;
-//     case 'stop':
-//       console.log(`bot ${message} is stopped`);
-//       process.exit();
-//   }
-
-//   // console.log(`server send: ${message}`)
-//   // process.send('i am bot')
-// });
+const bot = new Bot(process.env, process.pid)

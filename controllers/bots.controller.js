@@ -5,12 +5,12 @@ const config = require('../bot/config')
 const botList = []
 
 module.exports.start = ctx => {
-  
+
 }
 
 module.exports.startAll = ctx => {
   try {
-    for(const bot of config.bots) {
+    for (const bot of config.bots) {
       _startBot(bot)
     }
 
@@ -28,7 +28,7 @@ module.exports.startAll = ctx => {
 
 module.exports.status = async ctx => {
   try {
-    const status = await _getStatus()
+    const status = await _getState()
 
     ctx.status = 200;
     ctx.body = {
@@ -47,32 +47,27 @@ module.exports.stop = ctx => {
 }
 
 module.exports.stopAll = ctx => {
-  
+
 }
 
-function _getStatus(){
+function _getState() {
   const arr = []
-  for(const bot of botList) {
+  for (const bot of botList) {
     arr.push(bot.getState())
   }
+
   return Promise.all(arr)
 }
 
-function _startBot(bot) {
-  const child = childProcess.fork('./bot/bot', [], {env: bot})
-  let customRes;
+function _startBot(data) {
+  const bot = childProcess.fork('./bot/bot', [],  Object.assign(process.env, data))
 
-  child.on('message', message => {
-    console.log(`foo: ${message}`)
-    customRes(`bar: ${message}`)
-  })
-
-  child.getState = _ => {
+  bot.getState = _ => {
     return new Promise(res => {
-      child.send('status')
-      customRes = res
+      bot.once('message', message => res(message))
+      bot.send('state')
     })
   }
 
-  botList.push(child)
+  botList.push(bot)
 }
