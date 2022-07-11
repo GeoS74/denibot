@@ -1,6 +1,13 @@
 const { expect } = require('chai');
 const fetch = require('node-fetch');
 
+require('dotenv').config({ path: './secret.env' });
+
+if (process.env.NODE_ENV !== 'develop') {
+  console.log('Error: нельзя запускать тесты в производственной среде, это может привести к потере данных');
+  process.exit();
+}
+
 const config = require('../config');
 const app = require('../app');
 const connection = require('../libs/connection');

@@ -3,6 +3,10 @@ const mongoose = require('mongoose');
 const connection = require('../libs/connection');
 
 const Schema = new mongoose.Schema({
+  mainNomenclatureId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Nomenclature',
+  },
   code: {
     type: String,
     index: true,
@@ -14,6 +18,7 @@ const Schema = new mongoose.Schema({
     ref: 'Owner',
     required: 'поле ${PATH} обязательно для заполнения',
   },
+  uri: String,
 }, {
   timestamps: true,
 });
