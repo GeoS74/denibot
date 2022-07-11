@@ -1,22 +1,24 @@
 const childProcess = require('child_process');
 
-const config = require('../bot/config')
+const Owner = require('../models/Owner');
+const ownerMapper = require('../mappers/owner.mapper');
 
-const botList = []
+const botList = [];
 
-module.exports.start = ctx => {
+module.exports.start = (ctx) => {
+  ctx.status = 501;
+};
 
-}
-
-module.exports.startAll = ctx => {
+module.exports.startAll = async (ctx) => {
   try {
-    for (const bot of config.bots) {
-      _startBot(bot)
+    const owners = await _getOwners();
+    for (const owner of owners) {
+      _startBot(ownerMapper(owner));
     }
 
     ctx.status = 200;
     ctx.body = {
-      message: 'all bots is started'
+      message: 'all bots is started',
     };
   } catch (error) {
     ctx.status = 500;
@@ -24,50 +26,50 @@ module.exports.startAll = ctx => {
       error: error.message,
     };
   }
-}
+};
 
-module.exports.status = async ctx => {
+module.exports.state = async (ctx) => {
   try {
-    const status = await _getState()
+    const state = await _getState();
 
     ctx.status = 200;
-    ctx.body = {
-      status: status
-    };
+    ctx.body = { state };
   } catch (error) {
     ctx.status = 500;
     ctx.body = {
       error: error.message,
     };
   }
-}
+};
 
-module.exports.stop = ctx => {
+module.exports.stop = (ctx) => {
+  ctx.status = 501;
+};
 
-}
-
-module.exports.stopAll = ctx => {
-
-}
+module.exports.stopAll = (ctx) => {
+  ctx.status = 501;
+};
 
 function _getState() {
-  const arr = []
+  const arr = [];
   for (const bot of botList) {
-    arr.push(bot.getState())
+    arr.push(bot.getState());
   }
 
-  return Promise.all(arr)
+  return Promise.all(arr);
 }
 
 function _startBot(data) {
-  const bot = childProcess.fork('./bot/bot', [],  Object.assign(process.env, data))
+  const bot = childProcess.fork('./child_process/bots.process', [], Object.assign(process.env, data));
 
-  bot.getState = _ => {
-    return new Promise(res => {
-      bot.once('message', message => res(message))
-      bot.send('state')
-    })
-  }
+  bot.getState = () => new Promise((res) => {
+    bot.once('message', (message) => res(message));
+    bot.send('state');
+  });
 
-  botList.push(bot)
+  botList.push(bot);
+}
+
+async function _getOwners() {
+  return Owner.find({ isMain: false });
 }

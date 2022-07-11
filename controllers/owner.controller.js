@@ -1,13 +1,11 @@
 const Owner = require('../models/Owner');
+const mapper = require('../mappers/owner.mapper');
 
 module.exports.add = async (ctx) => {
   try {
     const owner = await _addOwner(ctx.request.body);
     ctx.status = 201;
-    ctx.body = {
-      id: owner.id,
-      name: owner.name,
-    };
+    ctx.body = mapper(owner);
   } catch (error) {
     ctx.status = error?.errors ? 400 : 500;
     ctx.body = {
@@ -21,10 +19,7 @@ module.exports.update = async (ctx) => {
     const owner = await _updateOwner(ctx.params.id, ctx.request.body);
 
     ctx.status = 200;
-    ctx.body = {
-      id: owner.id,
-      name: owner.name,
-    };
+    ctx.body = mapper(owner);
   } catch (error) {
     ctx.status = error?.errors ? 400 : 500;
     ctx.body = {
@@ -44,10 +39,7 @@ module.exports.delete = async (ctx) => {
     }
 
     ctx.status = 200;
-    ctx.body = {
-      id: owner.id,
-      name: owner.name,
-    };
+    ctx.body = mapper(owner);
   } catch (error) {
     ctx.status = error?.errors ? 400 : 500;
     ctx.body = {
@@ -67,10 +59,7 @@ module.exports.get = async (ctx) => {
     }
 
     ctx.status = 200;
-    ctx.body = {
-      id: owner.id,
-      name: owner.name,
-    };
+    ctx.body = mapper(owner);
   } catch (error) {
     ctx.status = error?.errors ? 400 : 500;
     ctx.body = {
@@ -83,10 +72,7 @@ module.exports.getAll = async (ctx) => {
   try {
     const owners = await _getOwners(ctx.request.body);
     ctx.status = 200;
-    ctx.body = owners.map((owner) => ({
-      id: owner.id,
-      name: owner.name,
-    }));
+    ctx.body = owners.map((owner) => mapper(owner));
   } catch (error) {
     ctx.status = error?.errors ? 400 : 500;
     ctx.body = {
