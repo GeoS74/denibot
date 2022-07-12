@@ -43,8 +43,32 @@ module.exports.stateAll = async (ctx) => {
   }
 };
 
-module.exports.state = (ctx) => {
-  ctx.status = 501;
+module.exports.state = async (ctx) => {
+  try {
+    let state;
+    for (const bot of botList) {
+      if (ctx.params.pid === botList.pid) {
+        state = await bot.getState();
+        break;
+      }
+    }
+
+    if (!state) {
+      ctx.status = 400;
+      return ctx.body = {
+        error: 'bot not found',
+      };
+    }
+
+    console.log(state);
+    ctx.status = 200;
+    ctx.body = { stateBot: state };
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {
+      error: error.message,
+    };
+  }
 };
 
 module.exports.stop = (ctx) => {
