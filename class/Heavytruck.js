@@ -1,19 +1,19 @@
 const fetch = require('node-fetch');
+const { JSDOM } = require('jsdom');
 
 const Bot = require('./Bot');
 const Nomenclature = require('../models/Nomenclature');
 require('../models/Owner');
 
-module.exports = class Pricepzap extends Bot {
+module.exports = class Heavytruck extends Bot {
 
   async run() {
-    return;
     try {
       this._start = Date.now();
       this._end = null;
       this._error.length = 0;
       this._state = 'run';
-      const mainNomenclature = await Pricepzap._getMainNomenclature();
+      const mainNomenclature = await Heavytruck._getMainNomenclature();
       this._countMainNomeclateres = mainNomenclature.length;
       this._countProcessedPosition = 0;
       this._countAddPosition = 0;
@@ -22,8 +22,8 @@ module.exports = class Pricepzap extends Bot {
         this._countProcessedPosition++;
         if (position.article) {
           try {
-            const searchPositions = await Pricepzap._getSearchPosition(position);
-            if (await this._addPositions(position, searchPositions?.products)) {
+            const searchPositions = await this._getSearchPosition(position);
+            if (await this._addPositions(position, searchPositions)) {
               this._countAddPosition++;
             }
           } catch (error) {
@@ -35,37 +35,59 @@ module.exports = class Pricepzap extends Bot {
       this._state = 'stop';
       this._end = Date.now();
     } catch (error) {
+      console.log(error.message)
       this._state = `Fatal Error: ${error.message}`;
       this._end = Date.now();
     }
   }
 
-  async _addPositions(mainPositions, searchPositions) {
-    if (!Array.isArray(searchPositions)) {
+  async _addPositions(mainPosition, searchPositions) {
+    if (!searchPositions.length) {
       return false;
     }
     for (const position of searchPositions) {
-      await this._addPosition(mainPositions, position);
+      await this._addPosition(mainPosition, position);
     }
     return true;
   }
 
-  async _addPosition(mainPositions, position) {
+  async _addPosition(mainPosition, position) {
     return Nomenclature.create({
-      mainNomenclatureId: mainPositions.id,
-      code: position.product_id,
-      title: position.name,
+      mainNomenclatureId: mainPosition._id,
       owner: this._id,
-      uri: position.url,
+      code: position.product_id,
+      title: position.title,
+      uri: position.uri,
+      factory: position.factory
     });
   }
 
-  static async _getSearchPosition(position) {
-    return fetch(`https://pricepzap.ru/index.php?route=extension/module/live_search&filter_name=${encodeURI(position.article)}`)
+  _htmlParser(html) {
+    const result = []
+    const dom = new JSDOM(html);
+    const positions = dom.window.document.querySelectorAll('.shop2-product-item');
+    if (positions.length) {
+      for (const position of positions) {
+
+        const uri = position.querySelector('.product-name > a')?.href
+        const data = {
+          product_id: position.querySelector('input[name="product_id"]')?.value,
+          uri: uri ? new URL(uri, this._uri).toString() : undefined,
+          title: position.querySelector('.product-name > a')?.innerHTML,
+          factory: position.querySelector('.option_body > a')?.innerHTML,
+        }
+        result.push(data)
+      }
+    }
+    return result;
+  }
+
+  async _getSearchPosition(position) {
+    return fetch(`https://xn--e1afucc1b.su/shop/search?search_text=${encodeURI(position.article)}`)
       .then(async (res) => {
         if (res.ok) {
-          const result = await res.json();
-          return result;
+          const html = await res.text();
+          return this._htmlParser(html)
         }
 
         throw new Error(`search error by article: ${position.article}`);

@@ -39,22 +39,22 @@ module.exports = class Pricepzap extends Bot {
     }
   }
 
-  async _addPositions(mainPositions, searchPositions) {
+  async _addPositions(mainPosition, searchPositions) {
     if (!Array.isArray(searchPositions)) {
       return false;
     }
     for (const position of searchPositions) {
-      await this._addPosition(mainPositions, position);
+      await this._addPosition(mainPosition, position);
     }
     return true;
   }
 
-  async _addPosition(mainPositions, position) {
+  async _addPosition(mainPosition, position) {
     return Nomenclature.create({
-      mainNomenclatureId: mainPositions.id,
+      mainNomenclatureId: mainPosition._id,
+      owner: this._id,
       code: position.product_id,
       title: position.name,
-      owner: this._id,
       uri: position.url,
     });
   }

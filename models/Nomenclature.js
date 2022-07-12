@@ -3,6 +3,11 @@ const mongoose = require('mongoose');
 const connection = require('../libs/connection');
 
 const Schema = new mongoose.Schema({
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Owner',
+    required: 'поле ${PATH} обязательно для заполнения',
+  },
   mainNomenclatureId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Nomenclature',
@@ -13,12 +18,8 @@ const Schema = new mongoose.Schema({
   },
   article: String,
   title: String,
-  owner: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Owner',
-    required: 'поле ${PATH} обязательно для заполнения',
-  },
   uri: String,
+  factory: String,
 }, {
   timestamps: true,
 });
