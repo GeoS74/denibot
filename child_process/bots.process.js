@@ -1,5 +1,5 @@
 // const Bot = require('../class/Bot');
-const Pricepzap = require('../class/Pricepzap');
+// const Pricepzap = require('../class/Pricepzap');
+const Bot = require(`../class/${process.env.botName}`);
 
-// new Bot(process.env, process.pid);
-new Pricepzap(process.env, process.pid).run();
+new Bot(process.env, process.pid).run();

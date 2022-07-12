@@ -15,6 +15,9 @@ const Schema = new mongoose.Schema({
   uri: {
     type: String,
   },
+  botName: {
+    type: String,
+  },
 }, {
   timestamps: true,
 });

@@ -7,6 +7,7 @@ require('../models/Owner');
 module.exports = class Pricepzap extends Bot {
 
   async run() {
+    return;
     try {
       this._start = Date.now();
       this._end = null;
@@ -74,7 +75,7 @@ module.exports = class Pricepzap extends Bot {
       });
   }
 
- static  _getMainNomenclature() {
+  static _getMainNomenclature() {
     return Nomenclature.aggregate([
       {
         $lookup: {
