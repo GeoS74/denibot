@@ -20,8 +20,18 @@ const Schema = new mongoose.Schema({
   title: String,
   uri: String,
   factory: String,
+  toMatched: Array,
+  notMatched: Array,
 }, {
   timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
+});
+
+Schema.virtual('subs', {
+  ref: 'Nomenclature',
+  localField: '_id',
+  foreignField: 'mainNomenclatureId',
 });
 
 module.exports = connection.model('Nomenclature', Schema);

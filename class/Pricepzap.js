@@ -2,69 +2,31 @@ const fetch = require('node-fetch');
 
 const Bot = require('./Bot');
 const Nomenclature = require('../models/Nomenclature');
-require('../models/Owner');
 
 module.exports = class Pricepzap extends Bot {
-
-  async run() {
-    try {
-      this._start = Date.now();
-      this._end = null;
-      this._error.length = 0;
-      this._state = 'run';
-      const mainNomenclature = await Pricepzap._getMainNomenclature();
-      this._countMainNomeclateres = mainNomenclature.length;
-      this._countProcessedPosition = 0;
-      this._countAddPosition = 0;
-
-      for (const position of mainNomenclature) {
-        this._countProcessedPosition++;
-        if (position.article) {
-          try {
-            const searchPositions = await Pricepzap._getSearchPosition(position);
-            if (await this._addPositions(position, searchPositions?.products)) {
-              this._countAddPosition++;
-            }
-          } catch (error) {
-            this._error.push(error.message);
-          }
-        }
-      }
-
-      this._state = 'stop';
-      this._end = Date.now();
-    } catch (error) {
-      this._state = `Fatal Error: ${error.message}`;
-      this._end = Date.now();
-    }
-  }
-
-  async _addPositions(mainPosition, searchPositions) {
-    if (!Array.isArray(searchPositions)) {
-      return false;
-    }
-    for (const position of searchPositions) {
-      await this._addPosition(mainPosition, position);
-    }
-    return true;
-  }
-
-  async _addPosition(mainPosition, position) {
+  async _createPosition(mainNomenclatureId, position) {
     return Nomenclature.create({
-      mainNomenclatureId: mainPosition._id,
       owner: this._id,
+      mainNomenclatureId,
+      uri: position.url,
       code: position.product_id,
       title: position.name,
-      uri: position.url,
     });
   }
 
-  static async _getSearchPosition(position) {
-    return fetch(`https://pricepzap.ru/index.php?route=extension/module/live_search&filter_name=${encodeURI(position.article)}`)
+  // @return Array
+  async _getSearchPosition(position) {
+    const url = new URL(`/index.php?route=extension/module/live_search&filter_name=${encodeURI(position.article)}`, this._uri);
+    return fetch(url)
       .then(async (res) => {
         if (res.ok) {
-          const result = await res.json();
-          return result;
+          const data = await res.json();
+
+          if (Array.isArray(data?.products)) {
+            return data.products;
+          }
+
+          return [];
         }
 
         throw new Error(`search error by article: ${position.article}`);
@@ -72,26 +34,5 @@ module.exports = class Pricepzap extends Bot {
       .catch((error) => {
         throw new Error(error.message);
       });
-  }
-
- static  _getMainNomenclature() {
-    return Nomenclature.aggregate([
-      {
-        $lookup: {
-          from: 'owners',
-          localField: 'owner',
-          foreignField: '_id',
-          as: 'owner',
-        },
-      },
-      {
-        $match: {
-          'owner.isMain': true,
-        },
-      },
-      {
-        $unwind: '$owner',
-      },
-    ]);
   }
 };
