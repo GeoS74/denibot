@@ -9,4 +9,7 @@ module.exports = {
     uri: process.env.MONGO_DB || 'mongodb://localhost:27017/test',
     autoindex: (process.env.NODE_ENV === 'develop'),
   },
+  fetch: {
+    timeout: 10000,
+  }
 };

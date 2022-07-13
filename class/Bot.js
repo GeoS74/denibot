@@ -1,3 +1,6 @@
+const fs = require('fs')
+const path = require('path')
+
 const Nomenclature = require('../models/Nomenclature');
 require('../models/Owner');
 
@@ -61,6 +64,42 @@ module.exports = class Bot {
   }
 
   // P A R S E R  ***   M E T H O D S
+  async run() {
+    try {
+      this._reset();
+      this._state = 'run';
+
+      const mainNomenclature = await this._getMainNomenclature();
+      this._countMainNomeclateres = mainNomenclature.length;
+
+      for (const position of mainNomenclature) {
+        this._countProcessedPosition++;
+        if (position.article) {
+          try {
+            const searchPositions = await this._getSearchPosition(position.article);
+            if (await this._addPositions(position._id, searchPositions)) {
+              await this._addMatched(position._id, true);
+              this._countAddPosition += searchPositions.length;
+            } else {
+              await this._addMatched(position._id, false);
+            }
+          } catch (error) {
+            this._error.push(`${error.message} article:${position.article}`);
+
+            const logger = fs.createWriteStream(path.join(__dirname, '../log/error.txt'), { flags: 'a' });
+            logger.write(`${this.constructor.name} error: ${error.message} article:${position.article}\n`);
+          }
+        }
+      }
+
+      this._state = 'stop';
+      this._end = Date.now();
+    } catch (error) {
+      this._state = `Fatal Error: ${error.message}`;
+      this._end = Date.now();
+    }
+  }
+
   _reset() {
     this._start = Date.now();
     this._end = null;
@@ -80,39 +119,6 @@ module.exports = class Bot {
         },
       },
     );
-  }
-
-  async run() {
-    try {
-      this._reset();
-      this._state = 'run';
-
-      const mainNomenclature = await this._getMainNomenclature();
-      this._countMainNomeclateres = mainNomenclature.length;
-
-      for (const position of mainNomenclature) {
-        this._countProcessedPosition++;
-        if (position.article) {
-          try {
-            const searchPositions = await this._getSearchPosition(position);
-            if (await this._addPositions(position._id, searchPositions)) {
-              await this._addMatched(position._id, true);
-              this._countAddPosition += searchPositions.length;
-            } else {
-              await this._addMatched(position._id, false);
-            }
-          } catch (error) {
-            this._error.push(error.message);
-          }
-        }
-      }
-
-      this._state = 'stop';
-      this._end = Date.now();
-    } catch (error) {
-      this._state = `Fatal Error: ${error.message}`;
-      this._end = Date.now();
-    }
   }
 
   async _addPositions(mainNomenclatureId, searchPositions) {

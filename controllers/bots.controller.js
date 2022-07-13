@@ -5,10 +5,13 @@ const ownerMapper = require('../mappers/owner.mapper');
 
 const botList = [];
 
-module.exports.start = (ctx) => {
-  ctx.status = 501;
+module.exports.start = async (ctx) => {
+  ctx.status = 200;
+  ctx.body = ctx.headers
+  // ctx.status = 501;
 };
 
+const fetch = require('node-fetch');
 module.exports.startAll = async (ctx) => {
   try {
     const owners = await _getOwners();
@@ -47,7 +50,7 @@ module.exports.state = async (ctx) => {
   try {
     let state;
     for (const bot of botList) {
-      if (ctx.params.pid === botList.pid) {
+      if (ctx.params.pid === bot.pid) {
         state = await bot.getState();
         break;
       }

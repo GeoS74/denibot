@@ -2,7 +2,11 @@ const fetch = require('node-fetch');
 const { JSDOM } = require('jsdom');
 
 const Bot = require('./Bot');
+const Puppeteer = require('./Puppeteer');
 const Nomenclature = require('../models/Nomenclature');
+const config = require('../config')
+
+const puppeteer = new Puppeteer();
 
 module.exports = class Heavytruck extends Bot {
   async _createPosition(mainNomenclatureId, position) {
@@ -36,19 +40,30 @@ module.exports = class Heavytruck extends Bot {
   }
 
   // @return Array
-  async _getSearchPosition(position) {
-    const url = new URL(`/shop/search?search_text=${encodeURI(position.article)}`, this._uri);
-    return fetch(url)
-      .then(async (res) => {
-        if (res.ok) {
-          const html = await res.text();
-          return this._htmlParser(html);
-        }
-
-        throw new Error(`search error by article: ${position.article}`);
-      })
-      .catch((error) => {
-        throw new Error(error.message);
-      });
+  async _getSearchPosition(article) {
+    const url = new URL(`/shop/search?search_text=${encodeURI(article)}`, this._uri);
+    const data = await puppeteer.getPageText(url);
+    return this._htmlParser(data);
   }
+
+  // @return Array
+  // async _getSearchPosition(article) {
+  //   const url = new URL(`/shop/search?search_text=${encodeURI(article)}`, this._uri);
+  //   const controller = new AbortController()
+  //   const timeoutId = setTimeout(()=> controller.abort(), config.fetch.timeout)
+  //   const result = await fetch(url, {signal: controller.signal})
+  //     .then(async (res) => {
+  //       if (res.ok) {
+  //         const html = await res.text();
+  //         return this._htmlParser(html);
+  //       }
+
+  //       throw new Error(`search error`);
+  //     })
+  //     .catch((error) => {
+  //       throw new Error(error.message);
+  //     });
+  //     clearTimeout(timeoutId)
+  //     return result;
+  // }
 };

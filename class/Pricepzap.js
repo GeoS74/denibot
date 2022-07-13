@@ -1,7 +1,10 @@
 const fetch = require('node-fetch');
 
 const Bot = require('./Bot');
+const Puppeteer = require('./Puppeteer');
 const Nomenclature = require('../models/Nomenclature');
+
+const puppeteer = new Puppeteer();
 
 module.exports = class Pricepzap extends Bot {
   async _createPosition(mainNomenclatureId, position) {
@@ -15,24 +18,13 @@ module.exports = class Pricepzap extends Bot {
   }
 
   // @return Array
-  async _getSearchPosition(position) {
-    const url = new URL(`/index.php?route=extension/module/live_search&filter_name=${encodeURI(position.article)}`, this._uri);
-    return fetch(url)
-      .then(async (res) => {
-        if (res.ok) {
-          const data = await res.json();
-
-          if (Array.isArray(data?.products)) {
-            return data.products;
-          }
-
-          return [];
-        }
-
-        throw new Error(`search error by article: ${position.article}`);
-      })
-      .catch((error) => {
-        throw new Error(error.message);
-      });
+  async _getSearchPosition(article) {
+    const url = new URL(`/index.php?route=extension/module/live_search&filter_name=${encodeURI(article)}`, this._uri);
+    const data = await puppeteer.getPage(url);
+    
+    if (Array.isArray(data?.products)) {
+      return data.products;
+    }
+    return [];
   }
 };
