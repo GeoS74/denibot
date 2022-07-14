@@ -5,22 +5,52 @@ const ownerMapper = require('../mappers/owner.mapper');
 
 const botList = [];
 
+module.exports.createBots = async (ctx) => {
+  try {
+    const owners = await _getOwners();
+    for (const owner of owners) {
+      if (owner.botName !== 'Pricepzap') {
+        _createBot(ownerMapper(owner));
+      }
+    }
+
+    const state = await _getStateAll();
+
+    console.log(state);
+    ctx.status = 200;
+    ctx.body = {
+      countBots: state.length,
+      stateBot: state,
+    };
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {
+      error: error.message,
+    };
+  }
+};
+
 module.exports.start = async (ctx) => {
   ctx.status = 501;
 };
 
 module.exports.startAll = async (ctx) => {
   try {
-    const owners = await _getOwners();
-    for (const owner of owners) {
-      if (owner.botName !== 'Pricepzap') {
-        _startBot(ownerMapper(owner));
-      }
+    if (!botList.length) {
+      throw new Error('bots not created');
     }
 
+    for (const bot of botList) {
+      bot.send('run');
+    }
+
+    const state = await _getStateAll();
+
+    console.log(state);
     ctx.status = 200;
     ctx.body = {
-      message: 'all bots is started',
+      countBots: state.length,
+      stateBot: state,
     };
   } catch (error) {
     ctx.status = 500;
@@ -32,7 +62,7 @@ module.exports.startAll = async (ctx) => {
 
 module.exports.stateAll = async (ctx) => {
   try {
-    const state = await _getState();
+    const state = await _getStateAll();
 
     console.log(state);
     ctx.status = 200;
@@ -47,19 +77,14 @@ module.exports.stateAll = async (ctx) => {
 
 module.exports.state = async (ctx) => {
   try {
-    let state;
-    for (const bot of botList) {
-      if (ctx.params.pid === bot.pid) {
-        state = await bot.getState();
-        break;
-      }
-    }
+    const state = await _getState(+ctx.params.pid);
 
     if (!state) {
-      ctx.status = 400;
+      ctx.status = 404;
       ctx.body = {
         error: 'bot not found',
       };
+      return;
     }
 
     console.log(state);
@@ -81,7 +106,16 @@ module.exports.stopAll = (ctx) => {
   ctx.status = 501;
 };
 
-function _getState() {
+function _getState(pid) {
+  for (const bot of botList) {
+    if (pid === bot.pid) {
+      return bot.getState();
+    }
+  }
+  return null;
+}
+
+function _getStateAll() {
   const arr = [];
   for (const bot of botList) {
     arr.push(bot.getState());
@@ -90,7 +124,7 @@ function _getState() {
   return Promise.all(arr);
 }
 
-function _startBot(data) {
+function _createBot(data) {
   const bot = childProcess.fork('./child_process/bots.process', [], Object.assign(process.env, data));
 
   bot.getState = () => new Promise((res) => {

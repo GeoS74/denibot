@@ -54,6 +54,11 @@ module.exports = class Bot {
       case 'state':
         this.getState();
         break;
+      case 'run':
+        if (this._state !== 'run') {
+          this.run();
+        }
+        break;
       default:
     }
   }
