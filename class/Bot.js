@@ -73,7 +73,7 @@ module.exports = class Bot {
       this._countMainNomeclateres = mainNomenclature.length;
 
       for (const position of mainNomenclature) {
-        this._countProcessedPosition++;
+        this._countProcessedPosition += 1;
         if (position.article) {
           try {
             const searchPositions = await this._getSearchPosition(position.article);

@@ -6,10 +6,10 @@ module.exports.getOwner = (ctx, next) => {
       ctx.throw(404, 'owner not found');
     }
 
-    return next();
+    next();
   } catch (error) {
     ctx.status = error.status;
-    return ctx.body = {
+    ctx.body = {
       error: error.message,
     };
   }
@@ -21,10 +21,10 @@ module.exports.updateOwner = (ctx, next) => {
       ctx.throw(404, 'owner not found');
     }
 
-    return next();
+    next();
   } catch (error) {
     ctx.status = error.status;
-    return ctx.body = {
+    ctx.body = {
       error: error.message,
     };
   }
@@ -36,10 +36,10 @@ module.exports.delOwner = (ctx, next) => {
       ctx.throw(404, 'owner not found');
     }
 
-    return next();
+    next();
   } catch (error) {
     ctx.status = error.status;
-    return ctx.body = {
+    ctx.body = {
       error: error.message,
     };
   }

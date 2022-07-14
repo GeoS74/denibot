@@ -28,7 +28,7 @@ module.exports.upload = async (ctx) => {
   } catch (error) {
     if (error.code === 'ENOENT') {
       ctx.status = 404;
-      return ctx.body = {
+      ctx.body = {
         error: 'file not found',
       };
     }

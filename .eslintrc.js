@@ -14,11 +14,8 @@ module.exports = {
     'no-template-curly-in-string': 'off',
     'no-underscore-dangle': 'off',
     'no-use-before-define': 'off',
-    'consistent-return': 'off',
-    'no-return-assign': 'off',
     'no-restricted-syntax': 'off',
     'no-await-in-loop': 'off',
-    'no-plusplus': 'off',
   },
   ignorePatterns: ['*.test.js'],
 };

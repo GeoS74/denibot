@@ -33,7 +33,7 @@ module.exports.delete = async (ctx) => {
     const owner = await _delOwner(ctx.params.id);
     if (!owner) {
       ctx.status = 404;
-      return ctx.body = {
+      ctx.body = {
         error: 'owner not found',
       };
     }
@@ -53,7 +53,7 @@ module.exports.get = async (ctx) => {
     const owner = await _getOwner(ctx.params.id);
     if (!owner) {
       ctx.status = 404;
-      return ctx.body = {
+      ctx.body = {
         error: 'owner not found',
       };
     }

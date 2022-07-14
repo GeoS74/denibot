@@ -57,7 +57,7 @@ module.exports.state = async (ctx) => {
 
     if (!state) {
       ctx.status = 400;
-      return ctx.body = {
+      ctx.body = {
         error: 'bot not found',
       };
     }
