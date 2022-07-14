@@ -59,7 +59,7 @@ describe('/test/Owner.test.js', () => {
       expect(response.status, 'сервер возвращает статус 201').to.be.equal(201);
       expect(response.data, 'сервер возвращает объект с полями id, name, uri, isMain')
         .that.is.an('object')
-        .to.have.keys(['id', 'name', 'uri', 'isMain']);
+        .to.have.keys(['id', 'name', 'botName', 'uri', 'isMain']);
       expect(response.data.isMain, 'свойство isMain должно быть булевым')
         .that.be.an('boolean');
     });
@@ -80,7 +80,7 @@ describe('/test/Owner.test.js', () => {
       expect(response.data, 'сервер возвращает массив')
         .that.is.an('array');
       expect(response.data[0], 'сервер возвращает объект с полями id, name, uri, isMain')
-        .to.have.keys(['id', 'name', 'uri', 'isMain']);
+        .to.have.keys(['id', 'name', 'botName', 'uri', 'isMain']);
 
       const ownerId = await Owner.findOne().then((res) => res.id);
       response = await fetch(`http://localhost:${config.server.port}/owner/${ownerId}`, optional)
@@ -92,7 +92,7 @@ describe('/test/Owner.test.js', () => {
       expect(response.status, 'сервер возвращает статус 200').equal(200);
       expect(response.data, 'сервер возвращает объект с полями id, name, uri, isMain')
         .that.is.an('object')
-        .to.have.keys(['id', 'name', 'uri', 'isMain']);
+        .to.have.keys(['id', 'name', 'botName', 'uri', 'isMain']);
       expect(response.data.isMain, 'свойство isMain должно быть булевым')
         .that.be.an('boolean');
     });
@@ -119,7 +119,7 @@ describe('/test/Owner.test.js', () => {
       expect(response.status, 'сервер возвращает статус 200').to.be.equal(200);
       expect(response.data, 'сервер возвращает объект с полями id, name, uri, isMain')
         .that.is.an('object')
-        .to.have.keys(['id', 'name', 'uri', 'isMain']);
+        .to.have.keys(['id', 'name', 'botName', 'uri', 'isMain']);
       expect(response.data.isMain, 'свойство isMain должно быть булевым')
         .that.be.an('boolean');
 
@@ -160,7 +160,7 @@ describe('/test/Owner.test.js', () => {
       expect(response.status, 'сервер возвращает статус 200').to.be.equal(200);
       expect(response.data, 'сервер возвращает объект с полями id, name, uri, isMain')
         .that.is.an('object')
-        .to.have.keys(['id', 'name', 'uri', 'isMain']);
+        .to.have.keys(['id', 'name', 'botName', 'uri', 'isMain']);
       expect(response.data.isMain, 'свойство isMain должно быть булевым')
         .that.be.an('boolean');
     });

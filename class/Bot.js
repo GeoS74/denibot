@@ -1,5 +1,5 @@
-const fs = require('fs')
-const path = require('path')
+const fs = require('fs');
+const path = require('path');
 
 const Nomenclature = require('../models/Nomenclature');
 require('../models/Owner');
@@ -110,12 +110,12 @@ module.exports = class Bot {
   }
 
   _addMatched(positionId, match) {
-    const path = match ? 'toMatched' : 'notMatched';
+    const field = match ? 'toMatched' : 'notMatched';
     return Nomenclature.findByIdAndUpdate(
       positionId,
       {
         $push: {
-          [path]: this.constructor.name,
+          [field]: this.constructor.name,
         },
       },
     );

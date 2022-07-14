@@ -11,5 +11,5 @@ module.exports = {
   },
   fetch: {
     timeout: 10000,
-  }
+  },
 };

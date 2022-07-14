@@ -6,17 +6,16 @@ const ownerMapper = require('../mappers/owner.mapper');
 const botList = [];
 
 module.exports.start = async (ctx) => {
-  ctx.status = 200;
-  ctx.body = ctx.headers
-  // ctx.status = 501;
+  ctx.status = 501;
 };
 
-const fetch = require('node-fetch');
 module.exports.startAll = async (ctx) => {
   try {
     const owners = await _getOwners();
     for (const owner of owners) {
-      _startBot(ownerMapper(owner));
+      if (owner.botName !== 'Pricepzap') {
+        _startBot(ownerMapper(owner));
+      }
     }
 
     ctx.status = 200;
