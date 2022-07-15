@@ -1,3 +1,3 @@
 const Bot = require(`../class/${process.env.botName}`);
 
-new Bot(process.env, process.pid);
+(() => new Bot(process.env, process.pid))();

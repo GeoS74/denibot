@@ -6,14 +6,10 @@ const Owner = require('../models/Owner');
 
 module.exports.upload = async (ctx) => {
   try {
-    const fpath = path.join(__dirname, '../files/nomenclature.xls');
-    const workbook = XLSX.readFile(fpath);
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const arr = XLSX.utils.sheet_to_json(worksheet);
-
     const start = Date.now();
+    const arr = _readExcel('../files/nomenclature.xls');
     const ownerId = await _getMainOwnerId();
+
     await _delNomenclatures();
 
     for (const position of arr) {
@@ -31,6 +27,7 @@ module.exports.upload = async (ctx) => {
       ctx.body = {
         error: 'file not found',
       };
+      return;
     }
     ctx.status = 500;
     ctx.body = {
@@ -38,6 +35,14 @@ module.exports.upload = async (ctx) => {
     };
   }
 };
+
+function _readExcel(filePath) {
+  const fpath = path.join(__dirname, filePath);
+  const workbook = XLSX.readFile(fpath);
+  const sheetName = workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[sheetName];
+  return XLSX.utils.sheet_to_json(worksheet);
+}
 
 function _delNomenclatures() {
   return Nomenclature.deleteMany();

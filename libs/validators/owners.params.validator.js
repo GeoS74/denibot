@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 
-module.exports.getOwner = (ctx, next) => {
+module.exports.getOwner = async (ctx, next) => {
   try {
     if (!_objectIdValidate(ctx.params.id)) {
       ctx.throw(404, 'owner not found');
     }
 
-    next();
+    await next();
   } catch (error) {
     ctx.status = error.status;
     ctx.body = {
@@ -15,13 +15,13 @@ module.exports.getOwner = (ctx, next) => {
   }
 };
 
-module.exports.updateOwner = (ctx, next) => {
+module.exports.updateOwner = async (ctx, next) => {
   try {
     if (!_objectIdValidate(ctx.params.id)) {
       ctx.throw(404, 'owner not found');
     }
 
-    next();
+    await next();
   } catch (error) {
     ctx.status = error.status;
     ctx.body = {
@@ -30,13 +30,13 @@ module.exports.updateOwner = (ctx, next) => {
   }
 };
 
-module.exports.delOwner = (ctx, next) => {
+module.exports.delOwner = async (ctx, next) => {
   try {
     if (!_objectIdValidate(ctx.params.id)) {
       ctx.throw(404, 'owner not found');
     }
 
-    next();
+    await next();
   } catch (error) {
     ctx.status = error.status;
     ctx.body = {
