@@ -59,6 +59,13 @@ module.exports = class Bot {
           this.run();
         }
         break;
+      case 'stop':
+        this._state = 'stop';
+        break;
+      case 'kill':
+        this._state = 'stop';
+        process.exit();
+        break;
       default:
     }
   }
@@ -78,6 +85,10 @@ module.exports = class Bot {
       this._countMainNomeclateres = mainNomenclature.length;
 
       for (const position of mainNomenclature) {
+        if (this._state === 'stop') {
+          break;
+        }
+
         this._countProcessedPosition += 1;
         if (position.article) {
           try {
@@ -172,5 +183,11 @@ module.exports = class Bot {
         $unwind: '$owner',
       },
     ]);
+  }
+
+  static _pause(delay) {
+    return new Promise((res) => {
+      setTimeout(() => res(), delay);
+    });
   }
 };
