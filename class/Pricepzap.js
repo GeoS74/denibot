@@ -8,6 +8,8 @@ const Nomenclature = require('../models/Nomenclature');
 const puppeteer = new Puppeteer();
 
 module.exports = class Pricepzap extends Bot {
+  // @Override
+  // @return void
   async _createPosition(mainNomenclatureId, position) {
     return Nomenclature.create({
       owner: this._id,
@@ -18,6 +20,7 @@ module.exports = class Pricepzap extends Bot {
     });
   }
 
+  // @Override
   // @return Array
   async _getSearchPosition(article) {
     const url = new URL(`/index.php?route=extension/module/live_search&filter_name=${encodeURI(article)}`, this._uri);

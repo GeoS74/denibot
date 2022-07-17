@@ -9,6 +9,8 @@ const Nomenclature = require('../models/Nomenclature');
 const puppeteer = new Puppeteer();
 
 module.exports = class Heavytruck extends Bot {
+  // @Override
+  // @return void
   async _createPosition(mainNomenclatureId, position) {
     return Nomenclature.create({
       owner: this._id,
@@ -20,29 +22,11 @@ module.exports = class Heavytruck extends Bot {
     });
   }
 
-  _htmlParser(html) {
-    const result = [];
-    const dom = new JSDOM(html);
-    const positions = dom.window.document.querySelectorAll('.shop2-product-item');
-    if (positions.length) {
-      for (const position of positions) {
-        const uri = position.querySelector('.product-name > a')?.href;
-        const data = {
-          uri: uri ? new URL(uri, this._uri).toString() : undefined,
-          code: position.querySelector('input[name="product_id"]')?.value,
-          title: position.querySelector('.product-name > a')?.innerHTML,
-          factory: position.querySelector('.option_body > a')?.innerHTML,
-        };
-        result.push(data);
-      }
-    }
-    return result;
-  }
-
+  // @Override
   // @return Array
   async _getSearchPosition(article) {
     const url = new URL(`/shop/search?search_text=${encodeURI(article)}`, this._uri);
-    const data = await puppeteer.getPageText(url);
+    const data = await puppeteer.getPage(url, 'text');
     return this._htmlParser(data);
   }
 
@@ -64,6 +48,25 @@ module.exports = class Heavytruck extends Bot {
         throw new Error(error.message);
       });
     clearTimeout(timeoutId);
+    return result;
+  }
+
+  _htmlParser(html) {
+    const result = [];
+    const dom = new JSDOM(html);
+    const positions = dom.window.document.querySelectorAll('.shop2-product-item');
+    if (positions.length) {
+      for (const position of positions) {
+        const uri = position.querySelector('.product-name > a')?.href;
+        const data = {
+          uri: uri ? new URL(uri, this._uri).toString() : undefined,
+          code: position.querySelector('input[name="product_id"]')?.value,
+          title: position.querySelector('.product-name > a')?.innerHTML,
+          factory: position.querySelector('.option_body > a')?.innerHTML,
+        };
+        result.push(data);
+      }
+    }
     return result;
   }
 };

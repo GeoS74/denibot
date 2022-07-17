@@ -58,35 +58,14 @@ module.exports = class Puppeteer {
     await this._page.setDefaultNavigationTimeout(300000);
   }
 
-  async getPage(url) {
+  async getPage(url, returnText) {
     await this._startBrowser();
     await Puppeteer._pause(this._delay);
 
     const result = await this._page.goto(url)
       .then(async (res) => {
         if (res.ok()) {
-          return res.json();
-        }
-        throw new Error(`${this.constructor.name} error status: ${res.status()}`);
-      })
-      .catch(async (error) => {
-        await this._close();
-        throw new Error(error.message);
-      });
-
-    await this._close();
-    return result;
-  }
-
-  async getPageText(url) {
-    await this._startBrowser();
-
-    await Puppeteer._pause(this._delay);
-
-    const result = await this._page.goto(url)
-      .then(async (res) => {
-        if (res.ok()) {
-          return res.text();
+          return !!returnText ? res.text() : res.json();
         }
         throw new Error(`${this.constructor.name} error status: ${res.status()}`);
       })

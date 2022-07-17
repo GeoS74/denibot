@@ -76,6 +76,12 @@ module.exports = class Bot {
   }
 
   // P A R S E R  ***   M E T H O D S
+  // @return void
+  _createPosition() { }
+
+  // @return Array
+  _getSearchPosition() { return []; }
+
   async run() {
     try {
       this._reset();
@@ -90,21 +96,9 @@ module.exports = class Bot {
         }
 
         this._countProcessedPosition += 1;
+        
         if (position.article) {
-          try {
-            const searchPositions = await this._getSearchPosition(position.article);
-            if (await this._addPositions(position._id, searchPositions)) {
-              await this._addMatched(position._id, true);
-              this._countAddPosition += searchPositions.length;
-            } else {
-              await this._addMatched(position._id, false);
-            }
-          } catch (error) {
-            this._error.push(`${error.message} article:${position.article}`);
-
-            const logger = fs.createWriteStream(path.join(__dirname, '../log/error.txt'), { flags: 'a' });
-            logger.write(`${this.constructor.name} error: ${error.message} article:${position.article}\n`);
-          }
+          await this._matchPosition(position)
         }
       }
 
@@ -113,6 +107,23 @@ module.exports = class Bot {
     } catch (error) {
       this._state = `Fatal Error: ${error.message}`;
       this._end = Date.now();
+    }
+  }
+
+  async _matchPosition(position){
+    try {
+      const searchPositions = await this._getSearchPosition(position.article);
+      if (await this._addPositions(position._id, searchPositions)) {
+        await this._addMatched(position._id, true);
+        this._countAddPosition += searchPositions.length;
+      } else {
+        await this._addMatched(position._id, false);
+      }
+    } catch (error) {
+      this._error.push(`${error.message} article:${position.article}`);
+
+      const logger = fs.createWriteStream(path.join(__dirname, '../log/error.txt'), { flags: 'a' });
+      logger.write(`${this.constructor.name} error: ${error.message} article:${position.article}\n`);
     }
   }
 
@@ -125,8 +136,8 @@ module.exports = class Bot {
     this._countAddPosition = 0;
   }
 
-  _addMatched(positionId, match) {
-    const field = match ? 'toMatched' : 'notMatched';
+  _addMatched(positionId, isMatch) {
+    const field = isMatch ? 'toMatched' : 'notMatched';
     return Nomenclature.findByIdAndUpdate(
       positionId,
       {
@@ -146,11 +157,6 @@ module.exports = class Bot {
     }
     return true;
   }
-
-  _createPosition() { }
-
-  // @return Array
-  _getSearchPosition() { return []; }
 
   async _getMainNomenclature() {
     return Nomenclature.aggregate([

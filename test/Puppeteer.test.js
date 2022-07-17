@@ -27,7 +27,7 @@ describe('/test/Puppeteer.test.js', () => {
 
       _browser = await puppeteer.launch({
         headless: true, // hide browser
-        args: ['--proxy-server=socks5://127.0.0.1:9050'],
+        args: ['--proxy-server=socks5://127.0.0.1:9052'],
       });
       _page = await _browser.newPage();
       const ip2 = await _page.goto('https://api.ipify.org').then((res) => res.text());
