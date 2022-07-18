@@ -12,4 +12,13 @@ module.exports = {
   fetch: {
     timeout: 10000,
   },
+  bot: {
+    socksPort: {
+      Heavytruck: new Array(10).fill(null).map((e, i) => (9052 + i)),
+      Pricepzap: new Array(10).fill(null).map((e, i) => (9062 + i)),
+      SDMMotors: new Array(10).fill(null).map((e, i) => (9072 + i)),
+    },
+    queryDelay: 2000,
+    navigationTimeout: 30000,
+  },
 };

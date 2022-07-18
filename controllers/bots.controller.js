@@ -170,6 +170,7 @@ module.exports.killAll = async (ctx) => {
 
 async function _createBots() {
   const owners = await _getOwners();
+
   for (const owner of owners) {
     if (owner.botName !== 'Pricepzap') {
       _createBot(ownerMapper(owner));

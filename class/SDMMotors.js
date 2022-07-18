@@ -6,7 +6,7 @@ const Puppeteer = require('./Puppeteer');
 const Nomenclature = require('../models/Nomenclature');
 const config = require('../config');
 
-const puppeteer = new Puppeteer();
+const puppeteer = new Puppeteer(config.bot.socksPort.SDMMotors);
 
 module.exports = class SDMMotors extends Bot {
   // @Override

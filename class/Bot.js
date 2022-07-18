@@ -96,9 +96,9 @@ module.exports = class Bot {
         }
 
         this._countProcessedPosition += 1;
-        
+
         if (position.article) {
-          await this._matchPosition(position)
+          await this._matchPosition(position);
         }
       }
 
@@ -110,7 +110,7 @@ module.exports = class Bot {
     }
   }
 
-  async _matchPosition(position){
+  async _matchPosition(position) {
     try {
       const searchPositions = await this._getSearchPosition(position.article);
       if (await this._addPositions(position._id, searchPositions)) {

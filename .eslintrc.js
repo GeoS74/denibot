@@ -17,5 +17,5 @@ module.exports = {
     'no-restricted-syntax': 'off',
     'no-await-in-loop': 'off',
   },
-  ignorePatterns: ['*.test.js'],
+  ignorePatterns: ['*.test.js', '/files/*'],
 };

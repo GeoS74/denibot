@@ -1,5 +1,7 @@
 const puppeteer = require('puppeteer');
 
+const config = require('../config');
+
 module.exports = class Puppeteer {
   _browser;
 
@@ -7,29 +9,20 @@ module.exports = class Puppeteer {
 
   _currentPort;
 
-  _ports = [
-    '9050',
-    '9052',
-    '9053',
-    '9054',
-    '9055',
-    '9056',
-    '9057',
-    '9058',
-    '9059',
-    '9060',
-    '9061',
-    '9062',
-    '9063',
-    '9064',
-    '9065',
-    '9066',
-    '9067',
-    '9068',
-    '9069',
-  ];
+  _ports;
 
-  _delay = 2000;
+  _delay;
+
+  _navigationTimeout;
+
+  constructor(socksPorts) {
+    if (!Array.isArray(socksPorts) || !socksPorts.length) {
+      throw new Error(`${this.constructor.name}: socks ports is empty`);
+    }
+    this._ports = socksPorts;
+    this._delay = config.bot.queryDelay;
+    this._navigationTimeout = config.bot.navigationTimeout;
+  }
 
   _setPort() {
     if (!this._currentPort) {
@@ -55,7 +48,7 @@ module.exports = class Puppeteer {
       args: [`--proxy-server=socks5://127.0.0.1:${this._currentPort}`],
     });
     this._page = await this._browser.newPage();
-    await this._page.setDefaultNavigationTimeout(300000);
+    await this._page.setDefaultNavigationTimeout(this._navigationTimeout);
   }
 
   async getPage(url, returnText) {
@@ -65,9 +58,9 @@ module.exports = class Puppeteer {
     const result = await this._page.goto(url)
       .then(async (res) => {
         if (res.ok()) {
-          return !!returnText ? res.text() : res.json();
+          return returnText ? res.text() : res.json();
         }
-        throw new Error(`${this.constructor.name} error status: ${res.status()}`);
+        throw new Error(`${this.constructor.name} error status: ${res.status()} url: ${url}`);
       })
       .catch(async (error) => {
         await this._close();
