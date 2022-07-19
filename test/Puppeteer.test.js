@@ -13,7 +13,7 @@ describe('/test/Puppeteer.test.js', () => {
       _browser.close();
     });
 
-    it('Standart connect', async function test() {
+    it('connect', async function test() {
       this.timeout(10000);
 
       _browser = await puppeteer.launch({

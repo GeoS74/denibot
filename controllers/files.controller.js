@@ -1,5 +1,5 @@
 const XLSX = require('xlsx');
-const path = require('path');
+const fs = require('fs');
 
 const Nomenclature = require('../models/Nomenclature');
 const Owner = require('../models/Owner');
@@ -7,18 +7,15 @@ const Owner = require('../models/Owner');
 module.exports.upload = async (ctx) => {
   try {
     const start = Date.now();
-    const arr = _readExcel('../files/nomenclature.xls');
+    const positions = _readExceltoArray(ctx.request.files.file.filepath);
     const ownerId = await _getMainOwnerId();
-
     await _delNomenclatures();
-
-    for (const position of arr) {
-      await _addPosition(ownerId, Object.values(position));
-    }
+    const countRows = await _readPositions(positions, ownerId);
+    _delFile(ctx.request.files.file.filepath);
 
     ctx.status = 200;
     ctx.body = {
-      message: `uploaded ${arr.length} rows`,
+      message: `loaded ${countRows} rows out of ${positions.length}`,
       time: `${(Date.now() - start) / 1000} sec`,
     };
   } catch (error) {
@@ -36,9 +33,23 @@ module.exports.upload = async (ctx) => {
   }
 };
 
-function _readExcel(filePath) {
-  const fpath = path.join(__dirname, filePath);
-  const workbook = XLSX.readFile(fpath);
+async function _readPositions(positions, ownerId) {
+  let countRows = 0;
+  for (const position of positions) {
+    const row = Object.values(position);
+    const article = row[1].toString().trim();
+
+    if (article) {
+      row[1] = article;
+      await _addPosition(ownerId, row);
+      countRows += 1;
+    }
+  }
+  return countRows;
+}
+
+function _readExceltoArray(filePath) {
+  const workbook = XLSX.readFile(filePath);
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
   return XLSX.utils.sheet_to_json(worksheet);
@@ -58,5 +69,11 @@ function _addPosition(ownerId, position) {
     code: position[0],
     article: position[1],
     title: position[2],
+  });
+}
+
+function _delFile(filepath) {
+  fs.unlink(filepath, (err) => {
+    if (err) console.log(err);
   });
 }
