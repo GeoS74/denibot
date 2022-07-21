@@ -45,7 +45,11 @@ module.exports = class Puppeteer {
 
     this._browser = await puppeteer.launch({
       headless: true, // hide browser
-      args: [`--proxy-server=socks5://127.0.0.1:${this._currentPort}`],
+      args: [
+        `--proxy-server=socks5://127.0.0.1:${this._currentPort}`,
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+      ],
     });
     this._page = await this._browser.newPage();
     await this._page.setDefaultNavigationTimeout(this._navigationTimeout);
