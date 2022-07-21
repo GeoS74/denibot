@@ -1,8 +1,8 @@
 const puppeteer = require('puppeteer');
 
 (async _ => {
-  // await start(9050);
-  // await start(9052);
+  await start(9050);
+  await start(9052);
 
   console.log(new Array(10).fill(null).map((e, i) => (9052+i)))
   process.exit();
