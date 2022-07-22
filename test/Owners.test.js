@@ -151,9 +151,11 @@ describe('/test/Owner.test.js', () => {
 });
 
 function expectFieldState(data) {
-  expect(data, 'сервер возвращает объект с полями id, name, botName, uri, isMain')
+  expect(data, 'сервер возвращает объект с полями id, name, botName, uri, isMain, enabled')
     .that.be.an('object')
-    .to.have.keys(['id', 'name', 'botName', 'uri', 'isMain']);
+    .to.have.keys(['id', 'name', 'botName', 'uri', 'isMain', 'enabled']);
   expect(data.isMain, 'свойство isMain должно быть булевым')
+    .that.is.an('boolean');
+  expect(data.isMain, 'свойство enabled должно быть булевым')
     .that.is.an('boolean');
 }

@@ -18,6 +18,10 @@ const Schema = new mongoose.Schema({
   botName: {
     type: String,
   },
+  enabled: {
+    type: Boolean,
+    default: false,
+  },
 }, {
   timestamps: true,
 });

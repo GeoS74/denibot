@@ -172,7 +172,7 @@ async function _createBots() {
   const owners = await _getOwners();
 
   for (const owner of owners) {
-    if (owner.botName !== 'Pricepzap') {
+    if (owner.enabled) {
       _createBot(ownerMapper(owner));
     }
   }
