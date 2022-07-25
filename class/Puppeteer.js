@@ -26,10 +26,13 @@ module.exports = class Puppeteer {
 
   async getPage(url, returnText) {
     const port = this._getPort();
-    await this._startBrowser(port);
+    const browser = await Puppeteer._startBrowser(port);
+    const page = await browser.newPage();
+    page.setDefaultNavigationTimeout(this._navigationTimeout);
+
     await Puppeteer._pause(this._delay * Puppeteer._getRandomIndex(3));
 
-    const result = await this._page.goto(url)
+    return page.goto(url)
       .then(async (res) => {
         if (res.ok()) {
           return returnText ? res.text() : res.json();
@@ -37,16 +40,16 @@ module.exports = class Puppeteer {
         throw new Error(`${this.constructor.name} error status: ${res.status()} url: ${url}`);
       })
       .catch(async (error) => {
-        await this._stopBrowser(port);
         throw new Error(error.message);
+      })
+      .finally(async () => {
+        await browser.close();
+        this._resetPort(port);
       });
-
-    await this._stopBrowser(port);
-    return result;
   }
 
-  async _startBrowser(port) {
-    this._browser = await puppeteer.launch({
+  static async _startBrowser(port) {
+    return puppeteer.launch({
       headless: true, // hide browser
       args: [
         `--proxy-server=socks5://127.0.0.1:${port}`,
@@ -54,13 +57,6 @@ module.exports = class Puppeteer {
         '--disable-setuid-sandbox',
       ],
     });
-    this._page = await this._browser.newPage();
-    await this._page.setDefaultNavigationTimeout(this._navigationTimeout);
-  }
-
-  async _stopBrowser(port) {
-    this._resetPort(port);
-    return this._browser.close();
   }
 
   _resetPort(port) {
