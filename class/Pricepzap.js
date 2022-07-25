@@ -5,6 +5,8 @@ const Bot = require('./Bot');
 const Puppeteer = require('./Puppeteer');
 const Nomenclature = require('../models/Nomenclature');
 
+const puppeteer = new Puppeteer(config.bot.socksPort.Pricepzap);
+
 module.exports = class Pricepzap extends Bot {
   // @Override
   // @return void
@@ -22,7 +24,6 @@ module.exports = class Pricepzap extends Bot {
   // @return Array
   async _getSearchPosition(article) {
     const url = new URL(`/index.php?route=extension/module/live_search&filter_name=${encodeURI(article)}`, this._uri);
-    const puppeteer = new Puppeteer(config.bot.socksPort[this.constructor.name]);
     const data = await puppeteer.getPage(url);
 
     if (Array.isArray(data?.products)) {

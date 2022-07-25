@@ -65,7 +65,7 @@ module.exports = class Puppeteer {
 
   _resetPort(port) {
     const portIndex = this._usagePorts.indexOf(port);
-    this._usagePorts.slice(portIndex, 1);
+    this._usagePorts.splice(portIndex, 1);
   }
 
   _getPort() {
