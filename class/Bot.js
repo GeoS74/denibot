@@ -59,6 +59,11 @@ module.exports = class Bot {
           this.run();
         }
         break;
+      case 'runPrice':
+        if (this._state !== 'run') {
+          this.run(true);
+        }
+        break;
       case 'stop':
         this._state = 'stop';
         break;
@@ -80,18 +85,12 @@ module.exports = class Bot {
   // @return Array
   _getSearchPosition() { return []; }
 
-  async run() {
+  async run(makePrice) {
     try {
       this._reset();
       this._state = 'run';
 
-      const mainNomenclature = await this._getMainNomenclature();
-      this._countMainNomeclateres = mainNomenclature.length;
-
-      await Promise.all([
-        this._matchPositions(mainNomenclature.slice(0, 6000)),
-        this._matchPositions(mainNomenclature.slice(6000)),
-      ]);
+      await this._parsingData(makePrice);
 
       this._state = 'stop';
       this._end = Date.now();
@@ -101,29 +100,64 @@ module.exports = class Bot {
     }
   }
 
-  async _matchPositions(mainNomenclature) {
-    for (const position of mainNomenclature) {
-      if (this._state === 'stop') {
+  async _parsingData(makePrice) {
+    if (makePrice) {
+      const nomenclature = await this._getMatchedNomenclature();
+      this._countMainNomeclateres = nomenclature.length;
+      return Promise.all([
+        this._parsingPositions(nomenclature.slice(0, 6000), this._handlerPricePosition),
+        this._parsingPositions(nomenclature.slice(6000), this._handlerPricePosition),
+      ]);
+    }
+
+    const nomenclature = await this._getMainNomenclature();
+    this._countMainNomeclateres = nomenclature.length;
+    return Promise.all([
+      this._parsingPositions(nomenclature.slice(0, 6000), this._handlerMatchPosition),
+      this._parsingPositions(nomenclature.slice(6000), this._handlerMatchPosition),
+    ]);
+  }
+
+  async _parsingPositions(nomenclature, handler) {
+    for (const position of nomenclature) {
+      if (this._state !== 'run') {
         break;
       }
 
       this._countProcessedPosition += 1;
 
       if (position.article) {
-        await this._matchPosition(position);
+        await handler(position);
       }
     }
   }
 
-  async _matchPosition(position) {
+  async _handlerPricePosition(position) {
+    try {
+      // const searchPositions = await this._getSearchPosition(position.article);
+      // if (await this._addPositions(position._id, searchPositions)) {
+      //   await this._addMatched(position._id, true);
+      //   this._countAddPosition += searchPositions.length;
+      // } else {
+      //   await this._addMatched(position._id, false);
+      // }
+    } catch (error) {
+      this._error.push(`${error.message} article:${position.article}`);
+
+      const logger = fs.createWriteStream(path.join(__dirname, '../log/error.txt'), { flags: 'a' });
+      logger.write(`${this.constructor.name} error: ${error.message} article:${position.article}\n`);
+    }
+  }
+
+  async _handlerMatchPosition(position) {
     try {
       const searchPositions = await this._getSearchPosition(position.article);
       if (await this._addPositions(position._id, searchPositions)) {
         await this._addMatched(position._id, true);
         this._countAddPosition += searchPositions.length;
-      } else {
-        await this._addMatched(position._id, false);
+        return;
       }
+      await this._addMatched(position._id, false);
     } catch (error) {
       this._error.push(`${error.message} article:${position.article}`);
 
@@ -173,6 +207,10 @@ module.exports = class Bot {
       title: position.title || undefined,
       factory: position.factory || undefined,
     });
+  }
+
+  async _getMatchedNomenclature() {
+
   }
 
   async _getMainNomenclature() {
