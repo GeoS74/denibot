@@ -82,20 +82,6 @@ module.exports = class Bot {
   // @return Array
   _getSearchPosition() { return []; }
 
-  async _matchPositions(mainNomenclature) {
-    for (const position of mainNomenclature) {
-      if (this._state === 'stop') {
-        break;
-      }
-
-      this._countProcessedPosition += 1;
-
-      if (position.article) {
-        await this._matchPosition(position);
-      }
-    }
-  }
-
   async run() {
     try {
       this._reset();
@@ -114,6 +100,20 @@ module.exports = class Bot {
     } catch (error) {
       this._state = `Fatal Error: ${error.message}`;
       this._end = Date.now();
+    }
+  }
+
+  async _matchPositions(mainNomenclature) {
+    for (const position of mainNomenclature) {
+      if (this._state === 'stop') {
+        break;
+      }
+
+      this._countProcessedPosition += 1;
+
+      if (position.article) {
+        await this._matchPosition(position);
+      }
     }
   }
 

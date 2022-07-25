@@ -1,10 +1,10 @@
 const fetch = require('node-fetch');
 const { JSDOM } = require('jsdom');
 
+const config = require('../config');
 const Bot = require('./Bot');
 const Puppeteer = require('./Puppeteer');
 const Nomenclature = require('../models/Nomenclature');
-const config = require('../config');
 
 module.exports = class SDMMotors extends Bot {
   // @Override

@@ -9,6 +9,8 @@ module.exports = class Puppeteer {
 
   _ports;
 
+  _usagePorts = [];
+
   _delay;
 
   _navigationTimeout;
@@ -22,21 +24,9 @@ module.exports = class Puppeteer {
     this._navigationTimeout = config.bot.navigationTimeout;
   }
 
-  async _startBrowser() {
-    this._browser = await puppeteer.launch({
-      headless: true, // hide browser
-      args: [
-        `--proxy-server=socks5://127.0.0.1:${this._getPort()}`,
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-      ],
-    });
-    this._page = await this._browser.newPage();
-    await this._page.setDefaultNavigationTimeout(this._navigationTimeout);
-  }
-
   async getPage(url, returnText) {
-    await this._startBrowser();
+    const port = this._getPort();
+    await this._startBrowser(port);
     await Puppeteer._pause(this._delay * Puppeteer._getRandomIndex(3));
 
     const result = await this._page.goto(url)
@@ -47,20 +37,44 @@ module.exports = class Puppeteer {
         throw new Error(`${this.constructor.name} error status: ${res.status()} url: ${url}`);
       })
       .catch(async (error) => {
-        await this._close();
+        await this._stopBrowser(port);
         throw new Error(error.message);
       });
 
-    await this._close();
+    await this._stopBrowser(port);
     return result;
   }
 
-  async _close() {
+  async _startBrowser(port) {
+    this._browser = await puppeteer.launch({
+      headless: true, // hide browser
+      args: [
+        `--proxy-server=socks5://127.0.0.1:${port}`,
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+      ],
+    });
+    this._page = await this._browser.newPage();
+    await this._page.setDefaultNavigationTimeout(this._navigationTimeout);
+  }
+
+  async _stopBrowser(port) {
+    this._resetPort(port);
     return this._browser.close();
   }
 
+  _resetPort(port) {
+    const portIndex = this._usagePorts.indexOf(port);
+    this._usagePorts.slice(portIndex, 1);
+  }
+
   _getPort() {
-    return this._ports[Puppeteer._getRandomIndex(this._ports.length)];
+    const port = this._ports[Puppeteer._getRandomIndex(this._ports.length)];
+    if (this._usagePorts.indexOf(port) === -1) {
+      this._usagePorts.push(port);
+      return port;
+    }
+    return this._getPort();
   }
 
   static _getRandomIndex(max) {

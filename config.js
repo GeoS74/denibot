@@ -10,7 +10,7 @@ module.exports = {
     autoindex: (process.env.NODE_ENV === 'develop'),
   },
   fetch: {
-    timeout: 10000,
+    timeout: 30000,
   },
   bot: {
     socksPort: {
