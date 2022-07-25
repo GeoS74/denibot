@@ -6,8 +6,6 @@ const Puppeteer = require('./Puppeteer');
 const Nomenclature = require('../models/Nomenclature');
 const config = require('../config');
 
-const puppeteer = new Puppeteer(config.bot.socksPort.SDMMotors);
-
 module.exports = class SDMMotors extends Bot {
   // @Override
   // @return void
@@ -23,6 +21,7 @@ module.exports = class SDMMotors extends Bot {
   // @return Array
   async _getSearchPosition(article) {
     const url = new URL(`/search?search=${encodeURI(article)}`, this._uri);
+    const puppeteer = new Puppeteer(config.bot.socksPort[this.constructor.name]);
     const data = await puppeteer.getPage(url, 'text');
     return this._htmlParser(data);
   }

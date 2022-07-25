@@ -7,8 +7,6 @@ module.exports = class Puppeteer {
 
   _page;
 
-  _currentPort;
-
   _ports;
 
   _delay;
@@ -24,34 +22,11 @@ module.exports = class Puppeteer {
     this._navigationTimeout = config.bot.navigationTimeout;
   }
 
-  _setPort() {
-    this._currentPort = this.ports[_getRandomIndex(this.ports.length)];
-    // if (!this._currentPort) {
-    //   [this._currentPort] = this._ports;
-    //   return;
-    // }
-
-    // const index = this._ports.indexOf(this._currentPort);
-
-    // if ((index + 1) === this._ports.length) {
-    //   [this._currentPort] = this._ports;
-    //   return;
-    // }
-
-    // this._currentPort = this._ports[index + 1];
-  }
-
-  _getRandomIndex(max) {
-    return Math.floor(Math.random() * max);
-  }
-  
   async _startBrowser() {
-    this._setPort();
-
     this._browser = await puppeteer.launch({
       headless: true, // hide browser
       args: [
-        `--proxy-server=socks5://127.0.0.1:${this._currentPort}`,
+        `--proxy-server=socks5://127.0.0.1:${this._getPort()}`,
         '--no-sandbox',
         '--disable-setuid-sandbox',
       ],
@@ -62,7 +37,7 @@ module.exports = class Puppeteer {
 
   async getPage(url, returnText) {
     await this._startBrowser();
-    await Puppeteer._pause(this._delay);
+    await Puppeteer._pause(this._delay * Puppeteer._getRandomIndex(3));
 
     const result = await this._page.goto(url)
       .then(async (res) => {
@@ -82,6 +57,14 @@ module.exports = class Puppeteer {
 
   async _close() {
     return this._browser.close();
+  }
+
+  _getPort() {
+    return this._ports[Puppeteer._getRandomIndex(this._ports.length)];
+  }
+
+  static _getRandomIndex(max) {
+    return Math.floor(Math.random() * max);
   }
 
   static _pause(delay) {

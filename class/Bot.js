@@ -42,7 +42,7 @@ module.exports = class Bot {
       name: this._name,
       state: this._state,
       error: this._error,
-      processed: `обработано ${this._countProcessedPosition} из ${this._countMainNomeclateres} позиций`,
+      processed: `обработано ${this._countProcessedPosition} из ${this._countMainNomeclateres} позиций. Ошибок: ${this._error.length}`,
       writed: `записано ${this._countAddPosition} позиций`,
       runTime: `${this._getRunTime()} sec`,
     };
@@ -82,6 +82,20 @@ module.exports = class Bot {
   // @return Array
   _getSearchPosition() { return []; }
 
+  async _matchPositions(mainNomenclature) {
+    for (const position of mainNomenclature) {
+      if (this._state === 'stop') {
+        break;
+      }
+
+      this._countProcessedPosition += 1;
+
+      if (position.article) {
+        await this._matchPosition(position);
+      }
+    }
+  }
+
   async run() {
     try {
       this._reset();
@@ -90,17 +104,10 @@ module.exports = class Bot {
       const mainNomenclature = await this._getMainNomenclature();
       this._countMainNomeclateres = mainNomenclature.length;
 
-      for (const position of mainNomenclature) {
-        if (this._state === 'stop') {
-          break;
-        }
-
-        this._countProcessedPosition += 1;
-
-        if (position.article) {
-          await this._matchPosition(position);
-        }
-      }
+      await Promise.all([
+        this._matchPositions(mainNomenclature.slice(0, 6000)),
+        this._matchPositions(mainNomenclature.slice(6000)),
+      ]);
 
       this._state = 'stop';
       this._end = Date.now();

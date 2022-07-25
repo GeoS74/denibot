@@ -6,8 +6,6 @@ const Bot = require('./Bot');
 const Puppeteer = require('./Puppeteer');
 const Nomenclature = require('../models/Nomenclature');
 
-const puppeteer = new Puppeteer(config.bot.socksPort.Heavytruck);
-
 module.exports = class Heavytruck extends Bot {
   // @Override
   // @return void
@@ -26,6 +24,7 @@ module.exports = class Heavytruck extends Bot {
   // @return Array
   async _getSearchPosition(article) {
     const url = new URL(`/shop/search?search_text=${encodeURI(article)}`, this._uri);
+    const puppeteer = new Puppeteer(config.bot.socksPort[this.constructor.name]);
     const data = await puppeteer.getPage(url, 'text');
     return this._htmlParser(data);
   }
