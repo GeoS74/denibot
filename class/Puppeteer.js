@@ -25,21 +25,26 @@ module.exports = class Puppeteer {
   }
 
   _setPort() {
-    if (!this._currentPort) {
-      [this._currentPort] = this._ports;
-      return;
-    }
+    this._currentPort = this.ports[_getRandomIndex(this.ports.length)];
+    // if (!this._currentPort) {
+    //   [this._currentPort] = this._ports;
+    //   return;
+    // }
 
-    const index = this._ports.indexOf(this._currentPort);
+    // const index = this._ports.indexOf(this._currentPort);
 
-    if ((index + 1) === this._ports.length) {
-      [this._currentPort] = this._ports;
-      return;
-    }
+    // if ((index + 1) === this._ports.length) {
+    //   [this._currentPort] = this._ports;
+    //   return;
+    // }
 
-    this._currentPort = this._ports[index + 1];
+    // this._currentPort = this._ports[index + 1];
   }
 
+  _getRandomIndex(max) {
+    return Math.floor(Math.random() * max);
+  }
+  
   async _startBrowser() {
     this._setPort();
 
