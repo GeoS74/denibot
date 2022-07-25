@@ -45,6 +45,7 @@ module.exports = class Puppeteer {
       .finally(async () => {
         await browser.close();
         this._resetPort(port);
+        await Puppeteer._pause(this._delay * 2);
       });
   }
 

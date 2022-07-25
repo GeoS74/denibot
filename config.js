@@ -18,7 +18,7 @@ module.exports = {
       SDMMotors: new Array(10).fill(null).map((e, i) => (9052 + i)),
       Pricepzap: new Array(10).fill(null).map((e, i) => (9072 + i)),
     },
-    queryDelay: 10,
+    queryDelay: 1000,
     navigationTimeout: 0,
   },
 };
