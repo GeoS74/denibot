@@ -10,19 +10,6 @@ const puppeteer = new Puppeteer(config.bot.socksPort.Heavytruck);
 
 module.exports = class Heavytruck extends Bot {
   // @Override
-  // @return void
-  async _createPosition(mainNomenclatureId, position) {
-    return Nomenclature.create({
-      owner: this._id,
-      mainNomenclatureId,
-      uri: position.uri,
-      code: position.code,
-      title: position.title,
-      factory: position.factory,
-    });
-  }
-
-  // @Override
   // @return Array
   async _getSearchPosition(article) {
     const url = new URL(`/shop/search?search_text=${encodeURI(article)}`, this._uri);

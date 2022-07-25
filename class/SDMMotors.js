@@ -10,16 +10,6 @@ const puppeteer = new Puppeteer(config.bot.socksPort.SDMMotors);
 
 module.exports = class SDMMotors extends Bot {
   // @Override
-  // @return void
-  async _createPosition(mainNomenclatureId, position) {
-    return Nomenclature.create({
-      owner: this._id,
-      mainNomenclatureId,
-      uri: position.uri,
-    });
-  }
-
-  // @Override
   // @return Array
   async _getSearchPosition(article) {
     const url = new URL(`/search?search=${encodeURI(article)}`, this._uri);

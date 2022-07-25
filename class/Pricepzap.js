@@ -9,18 +9,6 @@ const puppeteer = new Puppeteer(config.bot.socksPort.Pricepzap);
 
 module.exports = class Pricepzap extends Bot {
   // @Override
-  // @return void
-  async _createPosition(mainNomenclatureId, position) {
-    return Nomenclature.create({
-      owner: this._id,
-      mainNomenclatureId,
-      uri: position.url,
-      code: position.product_id,
-      title: position.name,
-    });
-  }
-
-  // @Override
   // @return Array
   async _getSearchPosition(article) {
     const url = new URL(`/index.php?route=extension/module/live_search&filter_name=${encodeURI(article)}`, this._uri);

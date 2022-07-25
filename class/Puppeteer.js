@@ -3,10 +3,6 @@ const puppeteer = require('puppeteer');
 const config = require('../config');
 
 module.exports = class Puppeteer {
-  _browser;
-
-  _page;
-
   _ports;
 
   _usagePorts = [];

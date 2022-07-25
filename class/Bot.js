@@ -76,8 +76,6 @@ module.exports = class Bot {
   }
 
   // P A R S E R  ***   M E T H O D S
-  // @return void
-  _createPosition() { }
 
   // @return Array
   _getSearchPosition() { return []; }
@@ -163,6 +161,18 @@ module.exports = class Bot {
       await this._createPosition(mainNomenclatureId, position);
     }
     return true;
+  }
+
+  // @return void
+  async _createPosition(mainNomenclatureId, position) {
+    return Nomenclature.create({
+      owner: this._id,
+      mainNomenclatureId,
+      uri: position.uri,
+      code: position.code || undefined,
+      title: position.title || undefined,
+      factory: position.factory || undefined,
+    });
   }
 
   async _getMainNomenclature() {
