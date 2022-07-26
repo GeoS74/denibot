@@ -104,8 +104,8 @@ module.exports = class Bot {
   }
 
   async _parsing(makePrice) {
-    let nomenclature; let
-      handler;
+    let nomenclature; 
+    let handler;
 
     if (makePrice) {
       nomenclature = await this._getMatchedNomenclature();

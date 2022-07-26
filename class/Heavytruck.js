@@ -20,8 +20,7 @@ module.exports = class Heavytruck extends Bot {
     const dom = new JSDOM(html);
     const price = dom.window.document.querySelector('.price-current strong');
     if (price) {
-      const p = price.innerHTML.replaceAll('&nbsp;', '');
-      result = parseFloat(p);
+      result = parseFloat.call(null, price.innerHTML.replaceAll('&nbsp;', ''));
     }
     return result;
   }
