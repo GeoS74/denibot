@@ -3,7 +3,6 @@ const fetch = require('node-fetch');
 const config = require('../config');
 const Bot = require('./Bot');
 const Puppeteer = require('./Puppeteer');
-const Nomenclature = require('../models/Nomenclature');
 
 const puppeteer = new Puppeteer(config.bot.socksPort.Pricepzap);
 
