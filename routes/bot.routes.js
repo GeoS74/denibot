@@ -15,5 +15,6 @@ router.get('/stop/:pid', botController.stop);
 router.get('/stop', botController.stopAll);
 router.get('/kill/:pid', botController.kill);
 router.get('/kill', botController.killAll);
+router.get('/statistic', botController.statistic);
 
 module.exports = router.routes();

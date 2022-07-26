@@ -129,6 +129,30 @@ describe('/test/Bots.test.js', () => {
         .to.have.property('error');
     });
 
+    it('bot statistic', async () => {
+      const response = await fetch(`http://localhost:${config.server.port}/bot/statistic`)
+        .then(async (res) => ({
+          status: res.status,
+          data: await res.json(),
+        }));
+
+      expect(response.status, 'сервер возвращает статус 200').to.be.equal(200);
+      expect(response.data, 'сервер возвращает объект с полями countBots, countActiveBots, countMainNomemclature, bots')
+        .that.is.an('object')
+        .to.have.keys(['countBots', 'countActiveBots', 'countMainNomemclature', 'bots']);
+      expect(response.data.countBots, 'свойство countBots должно быть числовым')
+        .that.be.an('number');
+      expect(response.data.countActiveBots, 'свойство countActiveBots должно быть числовым')
+        .that.be.an('number');
+      expect(response.data.countMainNomemclature, 'свойство countMainNomemclature должно быть числовым')
+        .that.be.an('number');
+      expect(response.data.bots, 'свойство bots должно быть массивом')
+        .that.be.an('array');
+      expect(response.data.bots[0], 'элемент bots должен быть объектом с полями botName, matchedPosition')
+        .that.be.an('object')
+        .to.have.keys(['botName', 'matchedPosition']);
+    });
+
     it('bot matched position', async () => {
       let response = await fetch(`http://localhost:${config.server.port}/bot/match`)
         .then(async (res) => ({

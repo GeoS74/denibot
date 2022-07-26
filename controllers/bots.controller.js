@@ -1,7 +1,9 @@
 const childProcess = require('child_process');
 
+const Nomenclature = require('../models/Nomenclature');
 const Owner = require('../models/Owner');
 const botMapper = require('../mappers/bot.mapper');
+const botStatisticMapper = require('../mappers/bot.statistic.mapper');
 const ownerMapper = require('../mappers/owner.mapper');
 
 const botList = [];
@@ -207,6 +209,20 @@ module.exports.killAll = async (ctx) => {
   }
 };
 
+module.exports.statistic = async (ctx) => {
+  try {
+    const statistic = await _getStatistic();
+
+    ctx.status = 200;
+    ctx.body = botStatisticMapper(statistic);
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {
+      error: error.message,
+    };
+  }
+};
+
 async function _createBots() {
   const owners = await _getOwners();
 
@@ -307,6 +323,66 @@ function _createBot(data) {
   });
 
   botList.push(bot);
+}
+
+async function _getStatistic() {
+  const owners = await _getOwners();
+  return {
+    countBots: owners.length,
+    countActiveBots: owners.filter((f) => f.enabled).length,
+    countMainNomemclature: await _countMainNomemclature(),
+    bots: await _getBotsStatistic(),
+  };
+}
+
+async function _countMainNomemclature() {
+  return Nomenclature.aggregate([
+    {
+      $lookup: {
+        from: 'owners',
+        localField: 'owner',
+        foreignField: '_id',
+        as: 'owner',
+      },
+    },
+    {
+      $match: {
+        'owner.isMain': true,
+      },
+    },
+  ])
+    .then((res) => res.length);
+}
+
+async function _getBotsStatistic() {
+  const arr = [];
+  const owners = await _getOwners();
+  for (const owner of owners) {
+    arr.push(_botStatistic(owner.botName));
+  }
+  return Promise.all(arr);
+}
+
+async function _botStatistic(botName) {
+  return Nomenclature.aggregate([
+    {
+      $lookup: {
+        from: 'owners',
+        localField: 'owner',
+        foreignField: '_id',
+        as: 'owner',
+      },
+    },
+    {
+      $match: {
+        'owner.botName': new RegExp(botName),
+      },
+    },
+  ])
+    .then((res) => ({
+      botName,
+      matchedPosition: res.length,
+    }));
 }
 
 async function _getOwners() {

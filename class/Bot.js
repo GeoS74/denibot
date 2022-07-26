@@ -104,7 +104,7 @@ module.exports = class Bot {
   }
 
   async _parsing(makePrice) {
-    let nomenclature; 
+    let nomenclature;
     let handler;
 
     if (makePrice) {
