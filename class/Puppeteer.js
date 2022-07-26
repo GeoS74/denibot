@@ -35,12 +35,12 @@ module.exports = class Puppeteer {
         }
         throw new Error(`${this.constructor.name} error status: ${res.status()} url: ${url}`);
       })
-      .catch(async (error) => {
+      .catch((error) => {
         throw new Error(error.message);
       })
       .finally(async () => {
-        await browser.close();
         this._resetPort(port);
+        await browser.close();
         await Puppeteer._pause(this._delay * 2);
       });
   }

@@ -14,7 +14,7 @@ module.exports = {
   },
   bot: {
     socksPort: {
-      Heavytruck: new Array(10).fill(null).map((e, i) => (9062 + i)),
+      Heavytruck: [9050, 9052] || new Array(10).fill(null).map((e, i) => (9062 + i)),
       SDMMotors: new Array(10).fill(null).map((e, i) => (9052 + i)),
       Pricepzap: new Array(10).fill(null).map((e, i) => (9072 + i)),
     },
