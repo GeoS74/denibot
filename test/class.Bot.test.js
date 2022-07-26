@@ -61,16 +61,21 @@ describe('/test/class.Bot.test.js', () => {
       expect(result, 'метод _getMainNomenclature возвращает массив').that.is.an('array');
     });
 
-    it('_addPositions', async () => {
-      let result = await _bot._addPositions(null, []);
-      expect(result, 'метод _addPositions возвращает false').equal(false);
-      result = await _bot._addPositions(null, [1]);
-      expect(result, 'метод _addPositions возвращает false').equal(true);
+    it('_getMatchedNomenclature', async function test() {
+      this.timeout(10000);
+
+      const result = await _bot._getMatchedNomenclature();
+      expect(result, 'метод _getMatchedNomenclature возвращает массив').that.is.an('array');
     });
 
     it('_getSearchPosition', async () => {
       const result = await _bot._getSearchPosition();
       expect(result, 'метод _getSearchPosition возвращает массив').that.is.an('array');
+    });
+
+    it('_getPricePosition', async () => {
+      const result = await _bot._getPricePosition();
+      expect(result, 'метод _getPricePosition возвращает число').that.is.an('number');
     });
   });
 });

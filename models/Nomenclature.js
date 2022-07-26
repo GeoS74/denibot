@@ -28,7 +28,7 @@ const Schema = new mongoose.Schema({
   toObject: { virtuals: true },
 });
 
-Schema.virtual('subs', {
+Schema.virtual('matchPositions', {
   ref: 'Nomenclature',
   localField: '_id',
   foreignField: 'mainNomenclatureId',

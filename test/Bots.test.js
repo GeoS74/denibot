@@ -13,6 +13,7 @@ describe('/test/Bots.test.js', () => {
     const owner = {
       name: 'bot',
       botName: 'Bot',
+      enabled: true,
     };
     const optional = {
       headers: {
@@ -29,9 +30,20 @@ describe('/test/Bots.test.js', () => {
     _server.close();
   });
 
-  describe('bots states', () => {
+  describe('bots states controller', () => {
     it('bot don`t start without init', async () => {
-      const response = await fetch(`http://localhost:${config.server.port}/bot/start`)
+      let response = await fetch(`http://localhost:${config.server.port}/bot/match`)
+        .then(async (res) => ({
+          status: res.status,
+          data: await res.json(),
+        }));
+
+      expect(response.status, 'сервер возвращает статус 500').to.be.equal(500);
+      expect(response.data, 'сервер возвращает объект с полем error')
+        .that.is.an('object')
+        .to.have.property('error');
+
+      response = await fetch(`http://localhost:${config.server.port}/bot/price`)
         .then(async (res) => ({
           status: res.status,
           data: await res.json(),
@@ -117,8 +129,8 @@ describe('/test/Bots.test.js', () => {
         .to.have.property('error');
     });
 
-    it('bot start', async () => {
-      let response = await fetch(`http://localhost:${config.server.port}/bot/start`)
+    it('bot matched position', async () => {
+      let response = await fetch(`http://localhost:${config.server.port}/bot/match`)
         .then(async (res) => ({
           status: res.status,
           data: await res.json(),
@@ -134,7 +146,7 @@ describe('/test/Bots.test.js', () => {
 
       response = await fetch(`http://localhost:${config.server.port}/bot/stop`);
 
-      response = await fetch(`http://localhost:${config.server.port}/bot/start/${pid}`)
+      response = await fetch(`http://localhost:${config.server.port}/bot/match/${pid}`)
         .then(async (res) => ({
           status: res.status,
           data: await res.json(),
@@ -145,7 +157,47 @@ describe('/test/Bots.test.js', () => {
       expect(response.data.stateBot.state, 'состояние бота должно быть run')
         .equal('run');
 
-      response = await fetch(`http://localhost:${config.server.port}/bot/start/1`)
+      response = await fetch(`http://localhost:${config.server.port}/bot/match/1`)
+        .then(async (res) => ({
+          status: res.status,
+          data: await res.json(),
+        }));
+
+      expect(response.status, 'сервер возвращает статус 404').to.be.equal(404);
+      expect(response.data, 'сервер возвращает объект с полем error')
+        .that.is.an('object')
+        .to.have.property('error');
+    });
+
+    it('bot pricing position', async () => {
+      let response = await fetch(`http://localhost:${config.server.port}/bot/price`)
+        .then(async (res) => ({
+          status: res.status,
+          data: await res.json(),
+        }));
+
+      expect(response.status, 'сервер возвращает статус 200').to.be.equal(200);
+      expectDataManyBots.call(this, response.data);
+      expectFieldState.call(this, response.data.stateBots[0]);
+      expect(response.data.stateBots[0].state, 'состояние бота должно быть run')
+        .equal('run');
+
+      const { pid } = response.data.stateBots[0];
+
+      response = await fetch(`http://localhost:${config.server.port}/bot/stop`);
+
+      response = await fetch(`http://localhost:${config.server.port}/bot/price/${pid}`)
+        .then(async (res) => ({
+          status: res.status,
+          data: await res.json(),
+        }));
+
+      expectDataOneBot.call(this, response.data);
+      expectFieldState.call(this, response.data.stateBot);
+      expect(response.data.stateBot.state, 'состояние бота должно быть run')
+        .equal('run');
+
+      response = await fetch(`http://localhost:${config.server.port}/bot/price/1`)
         .then(async (res) => ({
           status: res.status,
           data: await res.json(),
@@ -172,7 +224,7 @@ describe('/test/Bots.test.js', () => {
 
       const { pid } = response.data.stateBots[0];
 
-      response = await fetch(`http://localhost:${config.server.port}/bot/start`);
+      response = await fetch(`http://localhost:${config.server.port}/bot/match`);
 
       response = await fetch(`http://localhost:${config.server.port}/bot/stop/${pid}`)
         .then(async (res) => ({

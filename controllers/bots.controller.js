@@ -21,7 +21,7 @@ module.exports.create = async (ctx) => {
   }
 };
 
-module.exports.start = async (ctx) => {
+module.exports.match = async (ctx) => {
   try {
     const pid = +ctx.params.pid;
     _start(pid);
@@ -45,9 +45,48 @@ module.exports.start = async (ctx) => {
   }
 };
 
-module.exports.startAll = async (ctx) => {
+module.exports.matchAll = async (ctx) => {
   try {
     _startAll();
+    const state = await _getStateAll();
+
+    ctx.status = 200;
+    ctx.body = botMapper(state);
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {
+      error: error.message,
+    };
+  }
+};
+
+module.exports.price = async (ctx) => {
+  try {
+    const pid = +ctx.params.pid;
+    _start(pid, 'price');
+    const state = await _getState(pid);
+
+    if (!state) {
+      ctx.status = 404;
+      ctx.body = {
+        error: 'bot not found',
+      };
+      return;
+    }
+
+    ctx.status = 200;
+    ctx.body = botMapper(state);
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {
+      error: error.message,
+    };
+  }
+};
+
+module.exports.priceAll = async (ctx) => {
+  try {
+    _startAll('price');
     const state = await _getStateAll();
 
     ctx.status = 200;
@@ -178,22 +217,24 @@ async function _createBots() {
   }
 }
 
-function _start(pid) {
+function _start(pid, makePrice) {
   for (const bot of botList) {
     if (pid === bot.pid) {
-      bot.send('run');
+      const message = makePrice ? 'makePrice' : 'makeMatch';
+      bot.send(message);
       break;
     }
   }
 }
 
-function _startAll() {
+function _startAll(makePrice) {
   if (!botList.length) {
     throw new Error('bots not created');
   }
 
   for (const bot of botList) {
-    bot.send('run');
+    const message = makePrice ? 'makePrice' : 'makeMatch';
+    bot.send(message);
   }
 }
 

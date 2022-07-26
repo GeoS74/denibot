@@ -8,6 +8,13 @@ const puppeteer = new Puppeteer(config.bot.socksPort.Pricepzap);
 
 module.exports = class Pricepzap extends Bot {
   // @Override
+  // @return Integer
+  // async _getPricePosition(uri) {
+  //   const data = await puppeteer.getPage(uri, 'text');
+  //   return 0;
+  // }
+
+  // @Override
   // @return Array
   async _getSearchPosition(article) {
     const url = new URL(`/index.php?route=extension/module/live_search&filter_name=${encodeURI(article)}`, this._uri);

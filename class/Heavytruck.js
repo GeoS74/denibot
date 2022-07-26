@@ -9,11 +9,29 @@ const puppeteer = new Puppeteer(config.bot.socksPort.Heavytruck);
 
 module.exports = class Heavytruck extends Bot {
   // @Override
+  // @return Integer
+  async _getPricePosition(uri) {
+    const data = await puppeteer.getPage(uri, 'text');
+    return this._htmlParserPrice(data);
+  }
+
+  _htmlParserPrice(html) {
+    let result = 0;
+    const dom = new JSDOM(html);
+    const price = dom.window.document.querySelector('.price-current strong');
+    if (price) {
+      const p = price.innerHTML.replaceAll('&nbsp;', '');
+      result = parseFloat(p);
+    }
+    return result;
+  }
+
+  // @Override
   // @return Array
   async _getSearchPosition(article) {
     const url = new URL(`/shop/search?search_text=${encodeURI(article)}`, this._uri);
     const data = await puppeteer.getPage(url, 'text');
-    return this._htmlParser(data);
+    return this._htmlParserSearching(data);
   }
 
   // @return Array
@@ -25,7 +43,7 @@ module.exports = class Heavytruck extends Bot {
       .then(async (res) => {
         if (res.ok) {
           const html = await res.text();
-          return this._htmlParser(html);
+          return this._htmlParserSearching(html);
         }
 
         throw new Error('search error');
@@ -37,7 +55,7 @@ module.exports = class Heavytruck extends Bot {
     return result;
   }
 
-  _htmlParser(html) {
+  _htmlParserSearching(html) {
     const result = [];
     const dom = new JSDOM(html);
     const positions = dom.window.document.querySelectorAll('.shop2-product-item');

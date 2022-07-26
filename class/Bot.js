@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const Nomenclature = require('../models/Nomenclature');
+const Price = require('../models/Price');
 require('../models/Owner');
 
 module.exports = class Bot {
@@ -54,9 +55,14 @@ module.exports = class Bot {
       case 'state':
         this.getState();
         break;
-      case 'run':
+      case 'makeMatch':
         if (this._state !== 'run') {
           this.run();
+        }
+        break;
+      case 'makePrice':
+        if (this._state !== 'run') {
+          this.run('price');
         }
         break;
       case 'stop':
@@ -80,18 +86,14 @@ module.exports = class Bot {
   // @return Array
   _getSearchPosition() { return []; }
 
-  async run() {
+  _getPricePosition() { return 0; }
+
+  async run(makePrice) {
     try {
       this._reset();
       this._state = 'run';
 
-      const mainNomenclature = await this._getMainNomenclature();
-      this._countMainNomeclateres = mainNomenclature.length;
-
-      await Promise.all([
-        this._matchPositions(mainNomenclature.slice(0, 6000)),
-        this._matchPositions(mainNomenclature.slice(6000)),
-      ]);
+      await this._parsing(makePrice);
 
       this._state = 'stop';
       this._end = Date.now();
@@ -101,33 +103,65 @@ module.exports = class Bot {
     }
   }
 
-  async _matchPositions(mainNomenclature) {
-    for (const position of mainNomenclature) {
+  async _parsing(makePrice) {
+    let nomenclature; let
+      handler;
+
+    if (makePrice) {
+      nomenclature = await this._getMatchedNomenclature();
+      handler = this._priceHandler;
+    } else {
+      nomenclature = await this._getMainNomenclature();
+      handler = this._matchHandler;
+    }
+    this._countMainNomeclateres = nomenclature.length;
+
+    const range = Math.floor(nomenclature.length / 2);
+    return Promise.all([
+      this._positionProc(nomenclature.slice(0, range), handler),
+      this._positionProc(nomenclature.slice(range), handler),
+    ]);
+  }
+
+  async _positionProc(nomenclature, handler) {
+    for (const position of nomenclature) {
       if (this._state === 'stop') {
         break;
       }
 
       this._countProcessedPosition += 1;
-
-      if (position.article) {
-        await this._matchPosition(position);
+      if (position.article || position.uri) {
+        await handler.call(this, position);
       }
     }
   }
 
-  async _matchPosition(position) {
+  async _priceHandler(position) {
+    try {
+      const price = await this._getPricePosition(position.uri);
+      await Bot._createPrice(price, position);
+      this._countAddPosition += 1;
+    } catch (error) {
+      this._error.push(`priceError: ${error.message} article:${position.article}`);
+
+      const logger = fs.createWriteStream(path.join(__dirname, '../log/errorPrice.txt'), { flags: 'a' });
+      logger.write(`${this.constructor.name} error: ${error.message} article:${position.article}\n`);
+    }
+  }
+
+  async _matchHandler(position) {
     try {
       const searchPositions = await this._getSearchPosition(position.article);
-      if (await this._addPositions(position._id, searchPositions)) {
+      if (await this._addMatchPositions(position._id, searchPositions)) {
         await this._addMatched(position._id, true);
         this._countAddPosition += searchPositions.length;
       } else {
         await this._addMatched(position._id, false);
       }
     } catch (error) {
-      this._error.push(`${error.message} article:${position.article}`);
+      this._error.push(`matchError: ${error.message} article:${position.article}`);
 
-      const logger = fs.createWriteStream(path.join(__dirname, '../log/error.txt'), { flags: 'a' });
+      const logger = fs.createWriteStream(path.join(__dirname, '../log/errorMatch.txt'), { flags: 'a' });
       logger.write(`${this.constructor.name} error: ${error.message} article:${position.article}\n`);
     }
   }
@@ -141,7 +175,7 @@ module.exports = class Bot {
     this._countAddPosition = 0;
   }
 
-  _addMatched(positionId, isMatch) {
+  async _addMatched(positionId, isMatch) {
     const field = isMatch ? 'toMatched' : 'notMatched';
     return Nomenclature.findByIdAndUpdate(
       positionId,
@@ -153,7 +187,7 @@ module.exports = class Bot {
     );
   }
 
-  async _addPositions(mainNomenclatureId, searchPositions) {
+  async _addMatchPositions(mainNomenclatureId, searchPositions) {
     if (!searchPositions.length) {
       return false;
     }
@@ -163,7 +197,13 @@ module.exports = class Bot {
     return true;
   }
 
-  // @return void
+  static async _createPrice(price, position) {
+    return Price.create({
+      nomenclatureId: position._id,
+      price,
+    });
+  }
+
   async _createPosition(mainNomenclatureId, position) {
     return Nomenclature.create({
       owner: this._id,
@@ -173,6 +213,24 @@ module.exports = class Bot {
       title: position.title || undefined,
       factory: position.factory || undefined,
     });
+  }
+
+  async _getMatchedNomenclature() {
+    return Nomenclature.aggregate([
+      {
+        $lookup: {
+          from: 'owners',
+          localField: 'owner',
+          foreignField: '_id',
+          as: 'owner',
+        },
+      },
+      {
+        $match: {
+          'owner.botName': new RegExp(this.constructor.name),
+        },
+      },
+    ]);
   }
 
   async _getMainNomenclature() {
