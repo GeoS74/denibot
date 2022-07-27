@@ -240,14 +240,30 @@ module.exports = class Bot {
           'owner.botName': new RegExp(this.constructor.name),
         },
       },
-      {
+      // { //for MongoDB > v.5.0
+      //   $lookup: {
+      //     from: 'prices',
+      //     localField: '_id',
+      //     foreignField: 'nomenclatureId',
+      //     as: 'price',
+
+      //     pipeline: [{ $sort: { createdAt: -1 } }, { $limit: 1 }],
+      //   },
+      // },
+      { //for MongoDB > v.4.0
         $lookup: {
           from: 'prices',
-          localField: '_id',
-          foreignField: 'nomenclatureId',
+          let: {currentId: "$_id"},
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$nomenclatureId", "$$currentId"]
+                },
+              }
+            },
+            { $sort: { createdAt: -1 } }, { $limit: 1 }],
           as: 'price',
-
-          pipeline: [{ $sort: { createdAt: -1 } }, { $limit: 1 }],
         },
       },
       // { $unwind: '$price' },
