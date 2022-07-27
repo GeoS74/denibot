@@ -1,1 +1,1 @@
-{"options":{},"indexes":[{"v":2,"key":{"_id":1},"name":"_id_","ns":"denibot.prices"}],"uuid":"138ddefc2a3b41298b146e5bc78f65e8"}
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"18e88e01678745909af8912f72163b8f","collectionName":"prices","type":"collection"}

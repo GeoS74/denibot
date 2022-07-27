@@ -1,1 +1,1 @@
-{"options":{},"indexes":[{"v":2,"key":{"_id":1},"name":"_id_","ns":"denibot.nomenclatures"},{"v":2,"key":{"code":1},"name":"code_1","ns":"denibot.nomenclatures","background":true}],"uuid":"ae3aef75893846988574e02e93baab5f"}
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"code":{"$numberInt":"1"}},"name":"code_1","background":true}],"uuid":"498fb96a7fab4a5b81cb414f9f5c55db","collectionName":"nomenclatures","type":"collection"}
