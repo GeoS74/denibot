@@ -143,7 +143,6 @@ module.exports = class Bot {
       this._countAddPosition += 1;
     } catch (error) {
       this._error.push(`priceError: ${error.message} article:${position.article}`);
-      this._error.push(position);
 
       const logger = fs.createWriteStream(path.join(__dirname, '../log/errorPrice.txt'), { flags: 'a' });
       logger.write(`${this.constructor.name} error: ${error.message} article:${position.article}\n`);

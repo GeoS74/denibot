@@ -1,4 +1,7 @@
 const puppeteer = require('puppeteer');
+const puppeteerExtra = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteerExtra.use(StealthPlugin());
 
 const config = require('../config');
 
@@ -46,14 +49,19 @@ module.exports = class Puppeteer {
   }
 
   static async _startBrowser(port) {
-    return puppeteer.launch({
+    const option = {
       headless: true, // hide browser
       args: [
         `--proxy-server=socks5://127.0.0.1:${port}`,
         '--no-sandbox',
         '--disable-setuid-sandbox',
       ],
-    });
+    }
+
+    if(config.bot.stealthMode){
+      return puppeteerExtra.launch(option);
+    }
+    return puppeteer.launch(option);
   }
 
   _resetPort(port) {

@@ -20,5 +20,6 @@ module.exports = {
     },
     queryDelay: 1000,
     navigationTimeout: 0,
+    stealthMode: false,
   },
 };
