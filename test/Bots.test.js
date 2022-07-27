@@ -129,7 +129,8 @@ describe('/test/Bots.test.js', () => {
         .to.have.property('error');
     });
 
-    it('bot statistic', async () => {
+    it('bot statistic', async function f() {
+      this.timeout(10000);
       const response = await fetch(`http://localhost:${config.server.port}/bot/statistic`)
         .then(async (res) => ({
           status: res.status,
@@ -137,10 +138,12 @@ describe('/test/Bots.test.js', () => {
         }));
 
       expect(response.status, 'сервер возвращает статус 200').to.be.equal(200);
-      expect(response.data, 'сервер возвращает объект с полями countBots, countActiveBots, countMainNomemclature, bots')
+      expect(response.data, 'сервер возвращает объект с полями countBots, countEnabledBots, countActiveBots, countMainNomemclature, bots')
         .that.is.an('object')
-        .to.have.keys(['countBots', 'countActiveBots', 'countMainNomemclature', 'bots']);
+        .to.have.keys(['countBots', 'countEnabledBots', 'countActiveBots', 'countMainNomemclature', 'bots']);
       expect(response.data.countBots, 'свойство countBots должно быть числовым')
+        .that.be.an('number');
+      expect(response.data.countEnabledBots, 'свойство countEnabledBots должно быть числовым')
         .that.be.an('number');
       expect(response.data.countActiveBots, 'свойство countActiveBots должно быть числовым')
         .that.be.an('number');
@@ -273,7 +276,8 @@ describe('/test/Bots.test.js', () => {
         .to.have.property('error');
     });
 
-    it('bot kill', async () => {
+    it('bot kill', async function f() {
+      this.timeout(10000);
       // add new bot
       await fetch(`http://localhost:${config.server.port}/bot/init`);
 

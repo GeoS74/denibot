@@ -216,6 +216,16 @@ module.exports = class Bot {
   }
 
   async _getMatchedNomenclature() {
+    // The request populates the 'price' field with an array of prices,
+    // if there are no prices, the array is empty.
+    // In the pipeline $lookup section, the price array is filled with the last set price value
+    // and is limited to 1 element.
+    // The subsequent $match instruction leaves only those positions
+    // that do not have an attached price,
+    // or the price was updated earlier than a week ago.
+    // If the statement '$not: {$size: 0}' is uncommented in $match, then the selection will include
+    // only goods that have a price.
+    // The same effect will be if you uncomment $unwind.
     return Nomenclature.aggregate([
       {
         $lookup: {
@@ -228,6 +238,23 @@ module.exports = class Bot {
       {
         $match: {
           'owner.botName': new RegExp(this.constructor.name),
+        },
+      },
+      {
+        $lookup: {
+          from: 'prices',
+          localField: '_id',
+          foreignField: 'nomenclatureId',
+          as: 'price',
+
+          pipeline: [{ $sort: { createdAt: -1 } }, { $limit: 1 }],
+        },
+      },
+      // { $unwind: '$price' },
+      {
+        $match: {
+          // 'price': {$not: {$size: 0}},
+          'price.createdAt': { $not: { $gt: new Date(Date.now() - 1000 * 3600 * 24 * 7) } },
         },
       },
     ]);
@@ -260,9 +287,7 @@ module.exports = class Bot {
           ],
         },
       },
-      {
-        $unwind: '$owner',
-      },
+      { $unwind: '$owner' },
     ]);
   }
 

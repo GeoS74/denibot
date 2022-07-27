@@ -329,7 +329,8 @@ async function _getStatistic() {
   const owners = await _getOwners();
   return {
     countBots: owners.length,
-    countActiveBots: owners.filter((f) => f.enabled).length,
+    countEnabledBots: owners.filter((f) => f.enabled).length,
+    countActiveBots: botList.length,
     countMainNomemclature: await _countMainNomemclature(),
     bots: await _getBotsStatistic(),
   };
