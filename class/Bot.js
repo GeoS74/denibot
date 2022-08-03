@@ -250,17 +250,17 @@ module.exports = class Bot {
       //     pipeline: [{ $sort: { createdAt: -1 } }, { $limit: 1 }],
       //   },
       // },
-      { //for MongoDB > v.4.0
+      { // for MongoDB > v.4.0
         $lookup: {
           from: 'prices',
-          let: {currentId: "$_id"},
+          let: { currentId: '$_id' },
           pipeline: [
             {
               $match: {
                 $expr: {
-                  $eq: ["$nomenclatureId", "$$currentId"]
+                  $eq: ['$nomenclatureId', '$$currentId'],
                 },
-              }
+              },
             },
             { $sort: { createdAt: -1 } }, { $limit: 1 }],
           as: 'price',

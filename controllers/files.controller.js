@@ -60,7 +60,9 @@ function _delNomenclatures() {
 }
 
 function _getMainOwnerId() {
-  return Owner.findOne({ isMain: true }).then((res) => res.id);
+  return Owner.findOne({ isMain: true })
+    .then((res) => res.id)
+    .catch(() => { throw new Error('main owner is empty'); });
 }
 
 function _addPosition(ownerId, position) {

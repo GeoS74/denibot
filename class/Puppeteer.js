@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const puppeteerExtra = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+
 puppeteerExtra.use(StealthPlugin());
 
 const config = require('../config');
@@ -56,9 +57,9 @@ module.exports = class Puppeteer {
         '--no-sandbox',
         '--disable-setuid-sandbox',
       ],
-    }
+    };
 
-    if(config.bot.stealthMode){
+    if (config.bot.stealthMode) {
       return puppeteerExtra.launch(option);
     }
     return puppeteer.launch(option);
