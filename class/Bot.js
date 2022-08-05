@@ -1,6 +1,4 @@
-const fs = require('fs');
-const path = require('path');
-
+const logger = require('../libs/logger')('interceptor');
 const Nomenclature = require('../models/Nomenclature');
 const Price = require('../models/Price');
 require('../models/Owner');
@@ -143,9 +141,7 @@ module.exports = class Bot {
       this._countAddPosition += 1;
     } catch (error) {
       this._error.push(`priceError: ${error.message} article:${position.article}`);
-
-      const logger = fs.createWriteStream(path.join(__dirname, '../log/errorPrice.txt'), { flags: 'a' });
-      logger.write(`${this.constructor.name} error: ${error.message} article:${position.article}\n`);
+      logger.error(`${this.constructor.name} error: ${error.message} article:${position.article}\n`);
     }
   }
 
@@ -160,9 +156,7 @@ module.exports = class Bot {
       }
     } catch (error) {
       this._error.push(`matchError: ${error.message} article:${position.article}`);
-
-      const logger = fs.createWriteStream(path.join(__dirname, '../log/errorMatch.txt'), { flags: 'a' });
-      logger.write(`${this.constructor.name} error: ${error.message} article:${position.article}\n`);
+      logger.error(`${this.constructor.name} error: ${error.message} article:${position.article}\n`);
     }
   }
 

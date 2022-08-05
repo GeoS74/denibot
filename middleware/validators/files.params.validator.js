@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const logger = require('../../libs/logger');
+const logger = require('../../libs/logger')('default');
 
 module.exports.upload = async (ctx, next) => {
   try {

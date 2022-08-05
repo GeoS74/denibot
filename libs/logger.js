@@ -6,17 +6,21 @@ const config = require('../config');
 log4js.configure({
   appenders: {
     out: { type: 'stdout' },
-    app: {
+    file: {
       type: 'file',
       filename: path.join(__dirname, `../log/${config.log.file}`),
     },
   },
   categories: {
     default: {
-      appenders: ['out', 'app'],
+      appenders: ['out', 'file'],
       level: 'all',
     },
+    interceptor: {
+      appenders: ['file'],
+      level: 'warn',
+    }
   },
 });
 
-module.exports = (category) => log4js.getLogger(category || '');
+module.exports = (category) => log4js.getLogger(category || 'default');

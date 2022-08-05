@@ -3,7 +3,7 @@ const fs = require('fs');
 
 const Nomenclature = require('../models/Nomenclature');
 const Owner = require('../models/Owner');
-const logger = require('../libs/logger')('upload files');
+const logger = require('../libs/logger')('default');
 
 module.exports.upload = async (ctx) => {
   try {
