@@ -96,6 +96,7 @@ module.exports = class Bot {
       this._state = 'stop';
       this._end = Date.now();
     } catch (error) {
+      logger.error(`Fatal Error: ${error.message}`);
       this._state = `Fatal Error: ${error.message}`;
       this._end = Date.now();
     }

@@ -21,7 +21,7 @@ module.exports = {
     },
     queryDelay: 1000,
     navigationTimeout: 0,
-    stealthMode: true,
+    stealthMode: false,
   },
   log: {
     file: 'bolto.log',
