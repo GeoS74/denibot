@@ -23,4 +23,7 @@ module.exports = {
     navigationTimeout: 0,
     stealthMode: true,
   },
+  log: {
+    file: 'bolto.log',
+  },
 };

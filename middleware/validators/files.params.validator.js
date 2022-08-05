@@ -1,5 +1,7 @@
 const fs = require('fs');
 
+const logger = require('../../libs/logger');
+
 module.exports.upload = async (ctx, next) => {
   try {
     if (!ctx.request.files) {
@@ -41,7 +43,7 @@ module.exports.upload = async (ctx, next) => {
 function _deleteFile(files) {
   for (const file of Object.values(files)) {
     fs.unlink(file.filepath, (err) => {
-      if (err) console.log(err);
+      if (err) logger.error(err);
     });
   }
 }

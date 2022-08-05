@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "lint": "eslint .",
-        "lintfix": "eslint . --fix",
+        "lint:fix": "eslint . --fix",
         "test": "mocha --no-warnings --ignore=node_modules/** **/*.test.js"
     },
     "author": "GeoS",
@@ -24,6 +24,7 @@
         "koa": "^2.13.4",
         "koa-body": "^5.0.0",
         "koa-router": "^11.0.1",
+        "log4js": "^6.6.1",
         "mongoose": "^6.4.3",
         "mongoose-beautiful-unique-validation": "^7.1.1",
         "node-fetch": "^2.6.7",

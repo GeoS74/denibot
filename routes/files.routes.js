@@ -2,7 +2,7 @@ const Router = require('koa-router');
 const koaBody = require('koa-body');
 
 const fileController = require('../controllers/files.controller');
-const filesValidator = require('../libs/validators/files.params.validator');
+const filesValidator = require('../middleware/validators/files.params.validator');
 
 const optional = {
   formidable: {

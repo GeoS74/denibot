@@ -3,6 +3,7 @@ const fs = require('fs');
 
 const Nomenclature = require('../models/Nomenclature');
 const Owner = require('../models/Owner');
+const logger = require('../libs/logger')('upload files');
 
 module.exports.upload = async (ctx) => {
   try {
@@ -76,6 +77,6 @@ function _addPosition(ownerId, position) {
 
 function _delFile(filepath) {
   fs.unlink(filepath, (err) => {
-    if (err) console.log(err);
+    if (err) logger.error(err);
   });
 }

@@ -2,7 +2,7 @@ const Router = require('koa-router');
 const koaBody = require('koa-body');
 
 const ownerController = require('../controllers/owner.controller');
-const ownerValidator = require('../libs/validators/owners.params.validator');
+const ownerValidator = require('../middleware/validators/owners.params.validator');
 
 const router = new Router({ prefix: '/owner' });
 
