@@ -1,9 +1,8 @@
 const logger = require('../libs/logger')('interceptor');
 const Nomenclature = require('../models/Nomenclature');
+const Param = require('../models/Param');
 const Price = require('../models/Price');
 require('../models/Owner');
-
-const Param = require('../models/Param');
 
 module.exports = class Bot {
   _state;
@@ -56,25 +55,16 @@ module.exports = class Bot {
         this.getState();
         break;
       case 'match':
-        if (this._state !== 'run') {
-          this.run('match');
-        }
-        break;
       case 'price':
-        if (this._state !== 'run') {
-          this.run('price');
-        }
-        break;
       case 'param':
         if (this._state !== 'run') {
-          this.run('param');
+          this.run(message);
         }
         break;
       case 'stop':
         this._state = 'stop';
         break;
       case 'kill':
-        this._state = 'stop';
         process.exit();
         break;
       default:

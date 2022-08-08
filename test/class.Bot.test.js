@@ -1,9 +1,13 @@
 const { expect } = require('chai');
 const childProcess = require('child_process');
-
+const connection = require('../libs/connection');
 const Bot = require('../class/Bot');
 
 describe('/test/class.Bot.test.js', () => {
+  after(async () => {
+    connection.close();
+  });
+
   const data = {
     botName: 'Bot',
     name: 'testBot',

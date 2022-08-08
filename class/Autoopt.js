@@ -21,19 +21,19 @@ module.exports = class Autoopt extends Bot {
     const dom = new JSDOM(html);
     const result = {};
 
-    // title
-    result.title = dom.window.document.querySelector('.card-product-title') ? dom.window.document.querySelector('.card-product-title').textContent : undefined;
+    result.title = dom.window.document?.querySelector('.card-product-title')?.textContent;
 
-    // article:
-    result.article = dom.window.document.querySelector('.card-product-article') ? dom.window.document.querySelector('.card-product-article').textContent : undefined;
+    result.article = dom.window.document?.querySelector('.card-product-article')?.textContent;
     if (result.article) {
       if (result.article.toLowerCase().indexOf('артикул: ') !== -1) {
         result.article = result.article.slice(9);
       }
     }
 
+    result.description = dom.window.document?.querySelector('div[itemprop="description"]')?.innerHTML?.trim()?.replace(/<br>/g, '-----');
+
     // applicabilities
-    const basketId = dom.window.document.querySelector('in-basket') ? dom.window.document.querySelector('in-basket').getAttribute('id') : undefined;
+    const basketId = dom.window.document?.querySelector('in-basket')?.getAttribute('id');
     if (basketId) {
       try {
         result.applicabilities = await puppeteer.getPage(`https://www.autoopt.ru/api/v1/catalog/good-applicabilities/${basketId}?all=true&markId=0&modelId=0&loadFilters=true`, 'text');
@@ -43,51 +43,44 @@ module.exports = class Autoopt extends Bot {
       }
     }
 
-    // description
-    // искать надо в этом теге <div itemprop="description">...</div>,
-    // причём внутри может попадаться всё что угодно
-    result.description = dom.window.document.querySelector('div[itemprop="description"]')
-      ? dom.window.document.querySelector('div[itemprop="description"]').innerHTML.trim().replace(/<br>/g, '-----') : undefined;
-
-    // характеристики width, height, length, weight, manufacturer
+    // W x H x L and specification
     let table = dom.window.document.querySelector('.table-specification');
     if (table) {
       const specification = [];
-      for (let i = 0; i < table.rows.length; i += 1) {
-        // проверка на правильную вёрстку таблиц
-        // возможны вот такие ошибки в вёрстке: <tr>...</tr><tr></table>
-        if (table?.rows[i]?.cells?.length >= 2) {
-          const prop = table.rows[i].cells[0].textContent.toLowerCase();
+      for(row of table?.rows){
+        // WARNING - possible broken html, example: <tr>...</tr><tr></table>
+        if (row.cells?.length >= 2) {
+          const prop = row.cells[0]?.textContent?.toLowerCase();
 
           if (prop.indexOf('ширина') !== -1) {
-            result.width = table.rows[i].cells[1]?.textContent;
+            result.width = row.cells[1]?.textContent;
           } else if (prop.indexOf('высота') !== -1) {
-            result.height = table.rows[i].cells[1]?.textContent;
+            result.height = row.cells[1]?.textContent;
           } else if (prop.indexOf('длина') !== -1) {
-            result.length = table.rows[i].cells[1]?.textContent;
+            result.length = row.cells[1]?.textContent;
           } else if (prop.indexOf('вес') !== -1) {
-            result.weight = table.rows[i].cells[1]?.textContent;
+            result.weight = row.cells[1]?.textContent;
           }
 
-          specification.push(`${table.rows[i].cells[0].textContent}: ${table.rows[i].cells[1].textContent}`);
+          specification.push(`${row.cells[0]?.textContent}: ${row.cells[1]?.textContent}`);
         }
       }
+
       if (specification.length) result.specification = JSON.stringify(specification);
     }
 
-    // параметры
+    // parameter
     table = dom.window.document.querySelector('.table-item-options');
     if (table) {
       const parameter = [];
-      for (let i = 0; i < table.rows.length; i += 1) {
-        // проверка на правильную вёрстку таблиц
-        // возможны вот такие ошибки в вёрстке: <tr>...</tr><tr></table>
-        if (table?.rows[i]?.cells?.length >= 2) {
-          const prop = table.rows[i].cells[0].textContent.toLowerCase();
+      for(row of table?.rows){
+        // WARNING - possible broken html, example: <tr>...</tr><tr></table>
+        if (row.cells?.length >= 2) {
+          const prop = row.cells[0]?.textContent?.toLowerCase();
           if (prop.indexOf('производитель') !== -1) {
-            result.manufacturer = table.rows[i].cells[1]?.textContent;
+            result.manufacturer = row.cells[1]?.textContent;
           }
-          parameter.push(`${table.rows[i].cells[0].textContent}: ${table.rows[i].cells[1].textContent}`);
+          parameter.push(`${row.cells[0]?.textContent}: ${row.cells[1]?.textContent}`);
         }
       }
       if (parameter.length) result.parameter = JSON.stringify(parameter);

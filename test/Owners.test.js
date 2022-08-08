@@ -10,7 +10,6 @@ if (process.env.NODE_ENV !== 'develop') {
 
 const config = require('../config');
 const app = require('../app');
-const connection = require('../libs/connection');
 const Owner = require('../models/Owner');
 
 describe('/test/Owner.test.js', () => {
@@ -21,7 +20,6 @@ describe('/test/Owner.test.js', () => {
 
   after(async () => {
     await Owner.deleteMany();
-    connection.close();
     _server.close();
   });
 
