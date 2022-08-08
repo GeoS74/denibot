@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const connection = require('../libs/connection');
 
 const Schema = new mongoose.Schema({
-  parentId: {
+  nomenclatureId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Nomenclature',
     index: true,

@@ -17,7 +17,7 @@ module.exports = {
       Heavytruck: new Array(10).fill(null).map((e, i) => (9062 + i)),
       SDMMotors: new Array(10).fill(null).map((e, i) => (9052 + i)),
       Pricepzap: new Array(10).fill(null).map((e, i) => (9072 + i)),
-      Autoopt: new Array(20).fill(null).map((e, i) => (9052 + i)),
+      Autoopt: new Array(30).fill(null).map((e, i) => (9052 + i)),
     },
     queryDelay: 1000,
     navigationTimeout: 0,

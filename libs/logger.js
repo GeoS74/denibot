@@ -19,7 +19,7 @@ log4js.configure({
     interceptor: {
       appenders: ['file'],
       level: 'warn',
-    }
+    },
   },
 });
 
