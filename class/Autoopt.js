@@ -12,16 +12,98 @@ module.exports = class Autoopt extends Bot {
   // @return Integer
   async _getPricePosition(uri) {
     const data = await puppeteer.getPage(uri, 'text');
-    return this._htmlParserPrice(data);
+    return await this._htmlParserPrice(data);
   }
 
-  _htmlParserPrice(html) {
-    const result = 0;
-    // const dom = new JSDOM(html);
-    // const price = dom.window.document.querySelector('.price-current strong');
-    // if (price) {
-    //   result = parseFloat.call(null, price.innerHTML.replaceAll('&nbsp;', ''));
-    // }
+ async _htmlParserPrice(html) {
+    const dom = new JSDOM(html);
+    const result = {};
+
+    //title
+    result.title = dom.window.document.querySelector('.card-product-title') ? dom.window.document.querySelector('.card-product-title').textContent : undefined;
+
+    //article:
+    result.article = dom.window.document.querySelector('.card-product-article') ? dom.window.document.querySelector('.card-product-article').textContent : undefined;
+    if (result.article) {
+      if (~result.article.toLowerCase().indexOf('артикул: ')) {
+        result.article = result.article.slice(9);
+      }
+    }
+
+    // applicabilities
+    const basketId = dom.window.document.querySelector('in-basket') ? dom.window.document.querySelector('in-basket').getAttribute('id') : undefined;
+    if (basketId) {
+      try{
+        result.applicabilities = await puppeteer.getPage('https://www.autoopt.ru/api/v1/catalog/good-applicabilities/' + basketId + '?all=true&markId=0&modelId=0&loadFilters=true', 'text');
+      }catch(err){
+        result.applicabilities = undefined;
+        console.log(err.message)
+      }
+    }
+
+
+    //description
+    //искать надо в этом теге <div itemprop="description">...</div>, причём внутри может попадаться всё что угодно
+    result.description = dom.window.document.querySelector('div[itemprop="description"]') ?
+      dom.window.document.querySelector('div[itemprop="description"]').innerHTML.trim().replace(/<br>/g, '-----') : undefined;
+
+
+    //характеристики width, height, length, weight, manufacturer
+    let table = dom.window.document.querySelector('.table-specification');
+    if (table) {
+      let specification = [];
+      for (let i = 0; i < table.rows.length; i++) {
+        //проверка на правильную вёрстку таблиц
+        //возможны вот такие ошибки в вёрстке: <tr>...</tr><tr></table>
+        if (!table.rows[i]) continue;
+        if (!table.rows[i].cells[0]) continue;
+        if (!table.rows[i].cells[1]) continue;
+
+        let prop = table.rows[i].cells[0].textContent.toLowerCase();
+
+        if (~prop.indexOf('ширина')) {
+          result.width = table.rows[i].cells[1].textContent ? table.rows[i].cells[1].textContent : undefined;
+        }
+        else if (~prop.indexOf('высота')) {
+          result.height = table.rows[i].cells[1].textContent ? table.rows[i].cells[1].textContent : undefined;
+        }
+        else if (~prop.indexOf('длина')) {
+          result.length = table.rows[i].cells[1].textContent ? table.rows[i].cells[1].textContent : undefined;
+        }
+        else if (~prop.indexOf('вес')) {
+          result.weight = table.rows[i].cells[1].textContent ? table.rows[i].cells[1].textContent : undefined;
+        }
+
+        specification.push(table.rows[i].cells[0].textContent + ': ' + table.rows[i].cells[1].textContent);
+      }
+      if (specification.length) result.specification = JSON.stringify(specification);
+    }
+
+
+
+
+    //параметры
+    table = dom.window.document.querySelector('.table-item-options');
+    if(table){
+        let parameter = [];
+        for(let i = 0; i < table.rows.length; i++){
+            //проверка на правильную вёрстку таблиц
+            //возможны вот такие ошибки в вёрстке: <tr>...</tr><tr></table>
+            if(!table.rows[i]) continue;
+            if(!table.rows[i].cells[0]) continue;
+            if(!table.rows[i].cells[1]) continue;
+
+            let prop =  table.rows[i].cells[0].textContent.toLowerCase();
+
+                if( ~prop.indexOf('производитель') ){
+                  result.manufacturer = table.rows[i].cells[1].textContent ? table.rows[i].cells[1].textContent : undefined;
+                }
+
+                parameter.push(table.rows[i].cells[0].textContent+': '+table.rows[i].cells[1].textContent);
+        }
+        if(parameter.length) result.parameter = JSON.stringify(parameter);
+    }
+
     return result;
   }
 

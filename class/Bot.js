@@ -3,6 +3,8 @@ const Nomenclature = require('../models/Nomenclature');
 const Price = require('../models/Price');
 require('../models/Owner');
 
+const Param = require('../models/Param');
+
 module.exports = class Bot {
   _state;
 
@@ -115,10 +117,12 @@ module.exports = class Bot {
     }
     this._countMainNomeclateres = nomenclature.length;
 
-    const range = Math.floor(nomenclature.length / 2);
+    const range = Math.floor(nomenclature.length / 4);
     return Promise.all([
       this._positionProc(nomenclature.slice(0, range), handler),
-      this._positionProc(nomenclature.slice(range), handler),
+      this._positionProc(nomenclature.slice(range, range * 2), handler),
+      this._positionProc(nomenclature.slice(range * 2, range * 3), handler),
+      this._positionProc(nomenclature.slice(range * 3), handler),
     ]);
   }
 
@@ -192,12 +196,38 @@ module.exports = class Bot {
     return true;
   }
 
-  static async _createPrice(price, position) {
-    return Price.create({
+  // UNCOMMENT THIS  // UNCOMMENT THIS  // UNCOMMENT THIS  // UNCOMMENT THIS
+  //
+  // static async _createPrice(price, position) {
+  //   return Price.create({
+  //     nomenclatureId: position._id,
+  //     price: price || 0,
+  //   });
+  // }
+  //
+  // UNCOMMENT THIS  // UNCOMMENT THIS  // UNCOMMENT THIS  // UNCOMMENT THIS
+  static async _createPrice(params, position) {
+    await Price.create({
       nomenclatureId: position._id,
-      price: price || 0,
+      price: 1,
+    });
+    return Param.create({
+      parentId: position._id,
+      code: position.code,
+      title: params.title,
+      article: params.article,
+      description: params.description,
+      width: params.width,
+      height: params.height,
+      length: params.length,
+      weight: params.weight,
+      manufacturer: params.manufacturer,
+      specification: params.specification,
+      parameter: params.parameter,
+      applicabilities: params.applicabilities,
     });
   }
+
 
   async _createPosition(mainNomenclatureId, position) {
     return Nomenclature.create({
