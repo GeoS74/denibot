@@ -121,13 +121,14 @@ module.exports = class Bot {
 
     this._countMainNomeclateres = nomenclature.length;
 
-    const range = Math.floor(nomenclature.length / 5);
+    const range = Math.floor(nomenclature.length / 6);
     return Promise.all([
       this._positionProc(nomenclature.slice(0, range), handler),
       this._positionProc(nomenclature.slice(range, range * 2), handler),
       this._positionProc(nomenclature.slice(range * 2, range * 3), handler),
       this._positionProc(nomenclature.slice(range * 3, range * 4), handler),
-      this._positionProc(nomenclature.slice(range * 4), handler),
+      this._positionProc(nomenclature.slice(range * 4, range * 5), handler),
+      this._positionProc(nomenclature.slice(range * 5), handler),
     ]);
   }
 

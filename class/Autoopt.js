@@ -47,7 +47,7 @@ module.exports = class Autoopt extends Bot {
     let table = dom.window.document.querySelector('.table-specification');
     if (table) {
       const specification = [];
-      for(row of table?.rows){
+      for (const row of table.rows) {
         // WARNING - possible broken html, example: <tr>...</tr><tr></table>
         if (row.cells?.length >= 2) {
           const prop = row.cells[0]?.textContent?.toLowerCase();
@@ -73,7 +73,7 @@ module.exports = class Autoopt extends Bot {
     table = dom.window.document.querySelector('.table-item-options');
     if (table) {
       const parameter = [];
-      for(row of table?.rows){
+      for (const row of table.rows) {
         // WARNING - possible broken html, example: <tr>...</tr><tr></table>
         if (row.cells?.length >= 2) {
           const prop = row.cells[0]?.textContent?.toLowerCase();
