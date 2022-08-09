@@ -1,5 +1,6 @@
 const logger = require('../libs/logger')('interceptor');
 const Nomenclature = require('../models/Nomenclature');
+const Param = require('../models/Param');
 const Price = require('../models/Price');
 require('../models/Owner');
 
@@ -53,21 +54,17 @@ module.exports = class Bot {
       case 'state':
         this.getState();
         break;
-      case 'makeMatch':
+      case 'match':
+      case 'price':
+      case 'param':
         if (this._state !== 'run') {
-          this.run();
-        }
-        break;
-      case 'makePrice':
-        if (this._state !== 'run') {
-          this.run('price');
+          this.run(message);
         }
         break;
       case 'stop':
         this._state = 'stop';
         break;
       case 'kill':
-        this._state = 'stop';
         process.exit();
         break;
       default:
@@ -86,12 +83,14 @@ module.exports = class Bot {
 
   _getPricePosition() { return 0; }
 
-  async run(makePrice) {
+  _getParamPosition() { return {}; }
+
+  async run(mode) {
     try {
       this._reset();
       this._state = 'run';
 
-      await this._parsing(makePrice);
+      await this._parsing(mode);
 
       this._state = 'stop';
       this._end = Date.now();
@@ -102,23 +101,34 @@ module.exports = class Bot {
     }
   }
 
-  async _parsing(makePrice) {
+  async _parsing(mode) {
     let nomenclature;
     let handler;
 
-    if (makePrice) {
-      nomenclature = await this._getMatchedNomenclature();
-      handler = this._priceHandler;
-    } else {
-      nomenclature = await this._getMainNomenclature();
-      handler = this._matchHandler;
+    switch (mode) {
+      case 'price':
+        nomenclature = await this._getMatchedNomenclature();
+        handler = this._priceHandler;
+        break;
+      case 'param':
+        nomenclature = await this._getNomenclatureWithoutParams();
+        handler = this._paramHandler;
+        break;
+      default:
+        nomenclature = await this._getMainNomenclature();
+        handler = this._matchHandler;
     }
+
     this._countMainNomeclateres = nomenclature.length;
 
-    const range = Math.floor(nomenclature.length / 2);
+    const range = Math.floor(nomenclature.length / 6);
     return Promise.all([
       this._positionProc(nomenclature.slice(0, range), handler),
-      this._positionProc(nomenclature.slice(range), handler),
+      this._positionProc(nomenclature.slice(range, range * 2), handler),
+      this._positionProc(nomenclature.slice(range * 2, range * 3), handler),
+      this._positionProc(nomenclature.slice(range * 3, range * 4), handler),
+      this._positionProc(nomenclature.slice(range * 4, range * 5), handler),
+      this._positionProc(nomenclature.slice(range * 5), handler),
     ]);
   }
 
@@ -161,6 +171,17 @@ module.exports = class Bot {
     }
   }
 
+  async _paramHandler(position) {
+    try {
+      const params = await this._getParamPosition(position.uri);
+      await Bot._createParam(params, position);
+      this._countAddPosition += 1;
+    } catch (error) {
+      this._error.push(`paramError: ${error.message} article:${position.article}`);
+      logger.error(`${this.constructor.name} error: ${error.message} article:${position.article}\n`);
+    }
+  }
+
   _reset() {
     this._start = Date.now();
     this._end = null;
@@ -196,6 +217,24 @@ module.exports = class Bot {
     return Price.create({
       nomenclatureId: position._id,
       price: price || 0,
+    });
+  }
+
+  static async _createParam(params, position) {
+    return Param.create({
+      nomenclatureId: position._id,
+      code: position.code,
+      title: params.title,
+      article: params.article,
+      description: params.description,
+      width: params.width,
+      height: params.height,
+      length: params.length,
+      weight: params.weight,
+      manufacturer: params.manufacturer,
+      specification: params.specification,
+      parameter: params.parameter,
+      applicabilities: params.applicabilities,
     });
   }
 
@@ -299,6 +338,44 @@ module.exports = class Bot {
         },
       },
       { $unwind: '$owner' },
+    ]);
+  }
+
+  async _getNomenclatureWithoutParams() {
+    return Nomenclature.aggregate([
+      {
+        $lookup: {
+          from: 'owners',
+          localField: 'owner',
+          foreignField: '_id',
+          as: 'owner',
+        },
+      },
+      {
+        $match: {
+          'owner.botName': new RegExp(this.constructor.name),
+        },
+      },
+      { // for MongoDB > v.4.0
+        $lookup: {
+          from: 'params',
+          let: { currentId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$nomenclatureId', '$$currentId'],
+                },
+              },
+            }],
+          as: 'param',
+        },
+      },
+      {
+        $match: {
+          param: { $size: 0 },
+        },
+      },
     ]);
   }
 

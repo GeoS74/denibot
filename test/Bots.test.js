@@ -236,6 +236,46 @@ describe('/test/Bots.test.js', () => {
         .to.have.property('error');
     });
 
+    it('bot params position', async () => {
+      let response = await fetch(`http://localhost:${config.server.port}/bot/param`)
+        .then(async (res) => ({
+          status: res.status,
+          data: await res.json(),
+        }));
+
+      expect(response.status, 'сервер возвращает статус 200').to.be.equal(200);
+      expectDataManyBots.call(this, response.data);
+      expectFieldState.call(this, response.data.stateBots[0]);
+      expect(response.data.stateBots[0].state, 'состояние бота должно быть run')
+        .equal('run');
+
+      const { pid } = response.data.stateBots[0];
+
+      response = await fetch(`http://localhost:${config.server.port}/bot/stop`);
+
+      response = await fetch(`http://localhost:${config.server.port}/bot/param/${pid}`)
+        .then(async (res) => ({
+          status: res.status,
+          data: await res.json(),
+        }));
+
+      expectDataOneBot.call(this, response.data);
+      expectFieldState.call(this, response.data.stateBot);
+      expect(response.data.stateBot.state, 'состояние бота должно быть run')
+        .equal('run');
+
+      response = await fetch(`http://localhost:${config.server.port}/bot/param/1`)
+        .then(async (res) => ({
+          status: res.status,
+          data: await res.json(),
+        }));
+
+      expect(response.status, 'сервер возвращает статус 404').to.be.equal(404);
+      expect(response.data, 'сервер возвращает объект с полем error')
+        .that.is.an('object')
+        .to.have.property('error');
+    });
+
     it('bot stop', async () => {
       let response = await fetch(`http://localhost:${config.server.port}/bot/stop`)
         .then(async (res) => ({

@@ -4,24 +4,87 @@ const { JSDOM } = require('jsdom');
 const config = require('../config');
 const Bot = require('./Bot');
 const Puppeteer = require('./Puppeteer');
+const logger = require('../libs/logger')('interceptor');
 
 const puppeteer = new Puppeteer(config.bot.socksPort.Autoopt);
 
 module.exports = class Autoopt extends Bot {
   // @Override
-  // @return Integer
-  async _getPricePosition(uri) {
+  // @return Object
+  async _getParamPosition(uri) {
     const data = await puppeteer.getPage(uri, 'text');
-    return this._htmlParserPrice(data);
+    const params = await this._htmlParserParam(data);
+    return params;
   }
 
-  _htmlParserPrice(html) {
-    const result = 0;
-    // const dom = new JSDOM(html);
-    // const price = dom.window.document.querySelector('.price-current strong');
-    // if (price) {
-    //   result = parseFloat.call(null, price.innerHTML.replaceAll('&nbsp;', ''));
-    // }
+  async _htmlParserParam(html) {
+    const dom = new JSDOM(html);
+    const result = {};
+
+    result.title = dom.window.document?.querySelector('.card-product-title')?.textContent;
+
+    result.article = dom.window.document?.querySelector('.card-product-article')?.textContent;
+    if (result.article) {
+      if (result.article.toLowerCase().indexOf('артикул: ') !== -1) {
+        result.article = result.article.slice(9);
+      }
+    }
+
+    result.description = dom.window.document?.querySelector('div[itemprop="description"]')?.innerHTML?.trim()?.replace(/<br>/g, '-----');
+
+    // applicabilities
+    const basketId = dom.window.document?.querySelector('in-basket')?.getAttribute('id');
+    if (basketId) {
+      try {
+        result.applicabilities = await puppeteer.getPage(`https://www.autoopt.ru/api/v1/catalog/good-applicabilities/${basketId}?all=true&markId=0&modelId=0&loadFilters=true`, 'text');
+      } catch (err) {
+        result.applicabilities = undefined;
+        logger.error(err.message);
+      }
+    }
+
+    // W x H x L and specification
+    let table = dom.window.document.querySelector('.table-specification');
+    if (table) {
+      const specification = [];
+      for (const row of table.rows) {
+        // WARNING - possible broken html, example: <tr>...</tr><tr></table>
+        if (row.cells?.length >= 2) {
+          const prop = row.cells[0]?.textContent?.toLowerCase();
+
+          if (prop.indexOf('ширина') !== -1) {
+            result.width = row.cells[1]?.textContent;
+          } else if (prop.indexOf('высота') !== -1) {
+            result.height = row.cells[1]?.textContent;
+          } else if (prop.indexOf('длина') !== -1) {
+            result.length = row.cells[1]?.textContent;
+          } else if (prop.indexOf('вес') !== -1) {
+            result.weight = row.cells[1]?.textContent;
+          }
+
+          specification.push(`${row.cells[0]?.textContent}: ${row.cells[1]?.textContent}`);
+        }
+      }
+
+      if (specification.length) result.specification = JSON.stringify(specification);
+    }
+
+    // parameter
+    table = dom.window.document.querySelector('.table-item-options');
+    if (table) {
+      const parameter = [];
+      for (const row of table.rows) {
+        // WARNING - possible broken html, example: <tr>...</tr><tr></table>
+        if (row.cells?.length >= 2) {
+          const prop = row.cells[0]?.textContent?.toLowerCase();
+          if (prop.indexOf('производитель') !== -1) {
+            result.manufacturer = row.cells[1]?.textContent;
+          }
+          parameter.push(`${row.cells[0]?.textContent}: ${row.cells[1]?.textContent}`);
+        }
+      }
+      if (parameter.length) result.parameter = JSON.stringify(parameter);
+    }
     return result;
   }
 
@@ -44,7 +107,6 @@ module.exports = class Autoopt extends Bot {
           const html = await res.text();
           return this._htmlParserSearching(html);
         }
-
         throw new Error('search error');
       })
       .catch((error) => {

@@ -11,6 +11,7 @@ const Schema = new mongoose.Schema({
   mainNomenclatureId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Nomenclature',
+    index: true,
   },
   code: {
     type: String,
