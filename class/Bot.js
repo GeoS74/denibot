@@ -1,3 +1,4 @@
+const config = require('../config');
 const logger = require('../libs/logger')('interceptor');
 const Nomenclature = require('../models/Nomenclature');
 const Param = require('../models/Param');
@@ -121,15 +122,22 @@ module.exports = class Bot {
 
     this._countMainNomeclateres = nomenclature.length;
 
-    const range = Math.floor(nomenclature.length / 6);
-    return Promise.all([
-      this._positionProc(nomenclature.slice(0, range), handler),
-      this._positionProc(nomenclature.slice(range, range * 2), handler),
-      this._positionProc(nomenclature.slice(range * 2, range * 3), handler),
-      this._positionProc(nomenclature.slice(range * 3, range * 4), handler),
-      this._positionProc(nomenclature.slice(range * 4, range * 5), handler),
-      this._positionProc(nomenclature.slice(range * 5), handler),
-    ]);
+    return this._makeThreads(nomenclature, handler);
+  }
+
+  async _makeThreads(nomenclature, handler) {
+    const threads = [];
+    const step = Math.floor(nomenclature.length / config.bot.maxThreads);
+    const countThreads = step === 0 ? 1 : config.bot.maxThreads;
+
+    for (let i = 0; i < countThreads; i += 1) {
+      if (i === countThreads - 1) {
+        threads.push(this._positionProc(nomenclature.slice(i * step), handler));
+        break;
+      }
+      threads.push(this._positionProc(nomenclature.slice(i * step, (i + 1) * step), handler));
+    }
+    return Promise.all(threads);
   }
 
   async _positionProc(nomenclature, handler) {
