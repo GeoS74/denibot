@@ -53,17 +53,20 @@ require('../models/Param');
       'артикул БОВИД',
       'наименование БОВИД',
       'код АА',
-      'артикл',
-      'наименование',
+      // 'артикл',
+      // 'наименование',
       'длина',
       'ширина',
       'высота',
       'вес',
       'производитель',
-      'specification',
+      // 'specification',
       'parameter',
     ]];
 
+    // console.log(nom);
+    // console.log(nom[0].positions);
+    // return;
 
     nom.map((pos, i )=> {
       pos.positions.map((matchPos, k) => {
@@ -71,15 +74,15 @@ require('../models/Param');
 
         const www = temp.concat([
           matchPos.code,
-          matchPos?.parameters?.article,
-          matchPos?.parameters?.title,
+          // matchPos?.parameters?.article,
+          // matchPos?.parameters?.title,
           matchPos?.parameters?.length,
           matchPos?.parameters?.width,
           matchPos?.parameters?.height,
           matchPos?.parameters?.weight,
           matchPos?.parameters?.manufacturer,
-          null,
-          null
+          // null,
+          matchPos?.parameters?.parameter,
         ]);
 
         data.push(www)

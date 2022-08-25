@@ -19,7 +19,7 @@ module.exports = {
       Pricepzap: new Array(10).fill(null).map((e, i) => (9072 + i)),
       Autoopt: new Array(35).fill(null).map((e, i) => (9052 + i)),
     },
-    maxThreads: 10,
+    maxThreads: 15,
     queryDelay: 1000,
     navigationTimeout: 0,
     stealthMode: false,
