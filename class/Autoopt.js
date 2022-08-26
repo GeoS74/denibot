@@ -92,8 +92,8 @@ module.exports = class Autoopt extends Bot {
   // @return Array
   async _getSearchPosition(article) {
     const url = new URL(`/search/index?search=${encodeURI(article)}`, this._uri);
-    const data = await puppeteer.getPage(url, 'text');
-    return this._htmlParserSearching(data);
+    const html = await puppeteer.getPage(url, 'text');
+    return this._htmlParserSearching(html);
   }
 
   // @return Array
@@ -129,6 +129,10 @@ module.exports = class Autoopt extends Bot {
           article: position.querySelector('.n-catalog-item__article > .n-catalog-item__click-copy')?.innerHTML || undefined,
         };
         result.push(data);
+        
+        if(result.length === config.bot.maxSearchedPosition) {
+          break;
+        }
       }
     }
     return result;
