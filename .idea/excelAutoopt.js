@@ -35,6 +35,10 @@ require('../models/Param');
               localField: '_id',
               foreignField: 'nomenclatureId',
               as: 'parameters',
+
+              //ограничение количества параметров. Это немного странно, т.к. на одну позицию не должно быть больше 1 записи
+              //появился баг при парсинге папки ЯМЗ. Я пока отключу это и буду наблюдать дальше.
+              // pipeline: [{$limit: 1}]
             },
           },
           { $limit: 1 },
@@ -46,26 +50,26 @@ require('../models/Param');
       // }
     ]);
     console.log('end');
-
+    // console.log(nom);
     const data = [[
       '№ п/п',
       'код БОВИД',
       'артикул БОВИД',
       'наименование БОВИД',
       'код АА',
-      // 'артикл',
-      // 'наименование',
+      'артикл',
+      'наименование',
       'длина',
       'ширина',
       'высота',
       'вес',
       'производитель',
       // 'specification',
-      'parameter',
+      // 'parameter',
     ]];
 
-    // console.log(nom);
     // console.log(nom[0].positions);
+    // console.log(nom[0].positions[0].parameters);
     // return;
 
     nom.map((pos, i )=> {
@@ -74,15 +78,15 @@ require('../models/Param');
 
         const www = temp.concat([
           matchPos.code,
-          // matchPos?.parameters?.article,
-          // matchPos?.parameters?.title,
+          matchPos?.parameters?.article,
+          matchPos?.parameters?.title,
           matchPos?.parameters?.length,
           matchPos?.parameters?.width,
           matchPos?.parameters?.height,
           matchPos?.parameters?.weight,
           matchPos?.parameters?.manufacturer,
           // null,
-          matchPos?.parameters?.parameter,
+          // matchPos?.parameters?.parameter,
         ]);
 
         data.push(www)

@@ -20,12 +20,12 @@ module.exports = {
       Autoopt: new Array(35).fill(null).map((e, i) => (9052 + i)),
     },
     maxSearchedPosition: 3,
-    maxThreads: 15,
-    queryDelay: 1000,
+    maxThreads: 3,
+    queryDelay: 100,
     navigationTimeout: 0,
     stealthMode: false,
   },
   log: {
-    file: 'parsingMaz.log',
+    file: 'parsing.log',
   },
 };
